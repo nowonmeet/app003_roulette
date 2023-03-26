@@ -132,9 +132,6 @@ class _AddEditPageState extends State<AddEditPage>
 
   Future<void> _deleteItem(int id) async {
     await PartsViewModel.deleteItem(id);
-    // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-    //   content: Text('Successfully deleted a journal!'),
-    // ));
     await _refreshJournals();
     await _addUsedColors();
     await _initTextController();
@@ -149,7 +146,6 @@ class _AddEditPageState extends State<AddEditPage>
   }
 
   //帰ってきた時の処理
-//  WidgetsFlutterBinding.ensureInitialized();
 
   void pushWithReloadByReturn(BuildContext context, index) async {
     final result = await Navigator.push(
@@ -205,7 +201,6 @@ class _AddEditPageState extends State<AddEditPage>
     );
 
     //帰ってきた時の処理
-//    WidgetsFlutterBinding.ensureInitialized();
 
 
     return Focus(

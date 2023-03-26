@@ -1,10 +1,8 @@
 import 'package:app003_roulette/model/PartsViewModel.dart';
 import 'package:app003_roulette/model/RouletteViewModel.dart';
-import 'package:app003_roulette/pages/roulettePage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
-import 'package:roulette/roulette.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 import '../model/adIdManagement.dart';
@@ -53,7 +51,6 @@ class _ListPageState extends State<ListPage>
   int _checkRouletteId = 0;
 
   List<Map<String, dynamic>> _roulettes = [];
-  List<Map<String, dynamic>> _parts = [];
   List<List<Map<String, dynamic>>> _roulettesAll = [];
 
   bool _isLoading = true; //画面更新グルグルに使う判定値
@@ -78,13 +75,6 @@ class _ListPageState extends State<ListPage>
     });
   }
 
-  Future<void> _getParts(int index) async {
-    //データベースの一覧をパーツに登録。画面更新用
-    final data = await PartsViewModel.getNotes(_rouletteId);
-    setState(() {
-      _parts = data;
-    });
-  }
 
   _selectedRoulette(index) {
     if (_roulettes[index]['id'] == _rouletteId) {
@@ -188,7 +178,6 @@ class _ListPageState extends State<ListPage>
                 child: const Text('OK',
                   style: TextStyle(color: Colors.black),
                 ),
-//                onPressed: () => Navigator.of(context).pop(true),
                 onPressed: () {
                   _deleteItem(_roulettes[index]['id']);
                   Navigator.of(context).pop();
@@ -248,10 +237,9 @@ class _ListPageState extends State<ListPage>
                                                   },
                                                   style: ElevatedButton
                                                       .styleFrom(
-                                                    primary:
-                                                        Colors.transparent,
+                                                    foregroundColor: Colors.black45,
+                                                    backgroundColor: Colors.transparent,
                                                     elevation: 0,
-                                                    onPrimary: Colors.black45,
                                                   ),
                                                   child: const Text(''),
                                                 ),
@@ -370,9 +358,6 @@ class _ListPageState extends State<ListPage>
 
                     setState(() => _isDisabled = false); //ボタンを有効
                   },
-            // onPressed: () async {
-            //   await _addItem();
-            // },
             child: const Icon(Icons.add),
           ),
         ),

@@ -10,7 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import '../model/PartsViewModel.dart';
 import '../model/RouletteViewModel.dart';
-import '../model/parts.dart';
 import 'addEditPage.dart';
 import 'listPage.dart';
 
@@ -59,19 +58,21 @@ class _RoulettePageState extends State<RoulettePage>
   }
 
   // Shared PreferenceにIDを書き込む
-  _setRouletteId() async {
+  void _setRouletteId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     // 以下の「counter」がキー名。
     await prefs.setInt('rouletteId', _rouletteId);
   }
 
-  Future<void> _getTitle() async {
+  Future<void> _getTitle(rouletteId) async {
     //SQLからタイトルを取得
-    final data = await RouletteViewModel.getItem(_rouletteId);
-    setState(() {
-      _rouletteTitle = data[0]['name'];
-      _titleIsLoading = false;
-    });
+    final data = await RouletteViewModel.getItem(rouletteId);
+    if (data.isNotEmpty) {
+      setState(() {
+        _rouletteTitle = data[0]['name'];
+        _titleIsLoading = false;
+      });
+    }
   }
 
   Future<void> _refreshJournals() async {
@@ -107,7 +108,6 @@ class _RoulettePageState extends State<RoulettePage>
       group: _group,
       vsync: this,
     );
-    _ratioList = [];
     for (var i = 0; i < _parts.length; i++) {
       _ratioList.add(_parts[i]['ratio']);
     }
@@ -182,20 +182,6 @@ class _RoulettePageState extends State<RoulettePage>
     return retIndex;
   }
 
-  //検証用
-  // test() {
-  //   List<int> testTable = [1, 1, 1];
-  //   List count = [0, 1, 2];
-  //   for (var i = 0; i < 100000; ++i) {
-  //     int index = getRandomIndex(testTable);
-  //     count[index]++;
-  //   }
-  //
-  //   for (int index = 0; index < count.length; index++) {
-  //     print(count[index].toString());
-  //   }
-  // }
-
   _privacyPolicyURL() async {
     //プライバシーポリシーに遷移
     const url = "https://fir-memo-90c4e.web.app";
@@ -218,7 +204,7 @@ class _RoulettePageState extends State<RoulettePage>
     } else {
       if (result) {
         setState(() {
-          _getTitle();
+          _getTitle(_rouletteId);
           _reloadRoulette();
         });
       }
@@ -240,7 +226,7 @@ class _RoulettePageState extends State<RoulettePage>
     }
     setState(() {
       _setRouletteId();
-      _getTitle();
+      _getTitle(_rouletteId);
       _reloadRoulette();
     });
   }
@@ -251,7 +237,7 @@ class _RoulettePageState extends State<RoulettePage>
     Future(() async {
       await _firstStartup();
       await _getRouletteId();
-      await _getTitle();
+      await _getTitle(_rouletteId);
       await _reloadRoulette();
     });
     super.initState();
@@ -372,10 +358,9 @@ class _RoulettePageState extends State<RoulettePage>
                         height: 50,
                         child: ElevatedButton(
                           onPressed: () {},
-                          child: Text(''),
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.white,
-                            side: BorderSide(color: Colors.grey, width: 1),
+                            backgroundColor: Colors.white,
+                            side: const BorderSide(color: Colors.grey, width: 1),
                             elevation: 10,
                             shape: const BeveledRectangleBorder(
                               borderRadius: BorderRadius.only(
@@ -383,6 +368,7 @@ class _RoulettePageState extends State<RoulettePage>
                                   bottomLeft: Radius.circular(double.infinity)),
                             ),
                           ),
+                          child: const Text(''),
                         ),
                       ),
                     ),
