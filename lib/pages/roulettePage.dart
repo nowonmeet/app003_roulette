@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import '../model/PartsViewModel.dart';
 import '../model/RouletteViewModel.dart';
+import '../model/contact_form.dart';
 import 'addEditPage.dart';
 import 'listPage.dart';
 
@@ -283,11 +284,13 @@ class _RoulettePageState extends State<RoulettePage>
                 child: Text('メニュー')),
             ListTile(
               title: const Text('プライバシーポリシー'),
+              leading: const Icon(Icons.vpn_key),
               onTap: () {
                 _privacyPolicyURL();
                 Navigator.pop(context); //Drawerを閉じる
               },
             ),
+            const ContactForm(),
           ],
         ),
       ),
