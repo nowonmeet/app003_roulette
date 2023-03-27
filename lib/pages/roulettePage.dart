@@ -109,6 +109,7 @@ class _RoulettePageState extends State<RoulettePage>
       group: _group,
       vsync: this,
     );
+    _ratioList = [];
     for (var i = 0; i < _parts.length; i++) {
       _ratioList.add(_parts[i]['ratio']);
     }
@@ -243,6 +244,7 @@ class _RoulettePageState extends State<RoulettePage>
     });
     super.initState();
     _rouletteResult = '';
+
   }
 
 
