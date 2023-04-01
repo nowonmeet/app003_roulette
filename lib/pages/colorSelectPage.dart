@@ -1,10 +1,8 @@
 
 import 'package:app003_roulette/model/applocalizations.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../model/PartsViewModel.dart';
-import '../model/adIdManagement.dart';
 import '../model/colorList.dart';
 
 class ColorSelectPage extends StatefulWidget {
@@ -18,14 +16,7 @@ class ColorSelectPage extends StatefulWidget {
 }
 
 class _ColorSelectPageState extends State<ColorSelectPage> {
-  //広告用
-  // バナー広告をインスタンス化
-  final BannerAd myBanner = BannerAd(
-    adUnitId: AdIdManagement.colorSelectBannerAdUnitId,
-    size: AdSize.banner,
-    request: const AdRequest(),
-    listener: const BannerAdListener(),
-  );
+
 
   var appLocalizations = AppLocalizations();//多言語対応用
   var _languageCode = 'en'; //言語設定用
@@ -39,8 +30,6 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
 
   final _colorSelectList= ColorList().colorSelectList;
 
-
-//  int _rouletteId =0;
 
   List<Map<String, dynamic>> _parts = [];
   bool _isLoading = true; //画面更新グルグルに使う判定値
@@ -97,20 +86,7 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
 
   @override
   Widget build(BuildContext context) {
-    // バナー広告の読み込み
-    myBanner.load();
 
-    final AdWidget adWidget = AdWidget(ad: myBanner);
-
-    final Container adContainer = Container(
-      alignment: Alignment.center,
-      width: myBanner.size.width.toDouble(),
-      height: myBanner.size.height.toDouble(),
-      child: adWidget,
-    );
-
-
-//    final colorList = ColorList();
 
     return Scaffold(
       appBar: AppBar(
