@@ -1,5 +1,6 @@
 import 'package:app003_roulette/model/PartsViewModel.dart';
 import 'package:app003_roulette/model/RouletteViewModel.dart';
+import 'package:app003_roulette/model/applocalizations.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,20 @@ class _ListPageState extends State<ListPage>
     request: const AdRequest(),
     listener: const BannerAdListener(),
   );
+
+  var appLocalizations = AppLocalizations();//多言語対応用
+  var _languageCode = 'en'; //言語設定用
+
+  _getLanguage() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _languageCode = prefs.getString('languageCode') ?? 'ja';
+    });
+  }
+
+
   final _colorSelectList= ColorList().colorSelectList;
+
 
 
   _getCheckRouletteId() async {
@@ -91,6 +105,7 @@ class _ListPageState extends State<ListPage>
       await _refreshJournals();
       await _getRouletteAll();
       await _getCheckRouletteId();
+      await _getLanguage();
     });
   }
 
@@ -113,7 +128,7 @@ class _ListPageState extends State<ListPage>
 
     Future<void> _addItem() async {
       _isLoading = true;
-      await RouletteViewModel.createItem('新しいルーレット');
+      await RouletteViewModel.createItem(appLocalizations.getTranslatedValue(_languageCode,'newRoulette'));
 //      await RouletteViewModel.createItem('name',DateTime.now());
       final date = await RouletteViewModel.getLatestItem();
       await PartsViewModel.createItem(date[0]['id'], '', 0, 1);
@@ -143,8 +158,8 @@ class _ListPageState extends State<ListPage>
         barrierDismissible: false,
         builder: (context) {
           return AlertDialog(
-            title: const Text('注意'),
-            content: const Text('ルーレットは1つ以上必要です。'),
+            title: Text(appLocalizations.getTranslatedValue(_languageCode,'attention')),
+            content: Text(appLocalizations.getTranslatedValue(_languageCode,'rouletteAttention')),
             actions: [
               TextButton(
                   onPressed: () => Navigator.pop(context),
@@ -165,8 +180,8 @@ class _ListPageState extends State<ListPage>
         barrierDismissible: false,
         builder: (context) {
           return AlertDialog(
-            title: const Text('確認'),
-            content: Text('${_roulettes[index]['name']} を削除しますか？',),
+            title: Text(appLocalizations.getTranslatedValue(_languageCode,'check')),
+            content: Text(appLocalizations.getTranslatedValue(_languageCode,'deleteConfirmationMessage') + _roulettes[index]['name']),
             actions: <Widget>[
               TextButton(
                 child: const Text('Cancel',
@@ -195,7 +210,7 @@ class _ListPageState extends State<ListPage>
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
-          title: const Text('ルーレット一覧'),
+          title: Text(appLocalizations.getTranslatedValue(_languageCode,'list')),
           automaticallyImplyLeading: false,
         ),
         body: _isLoading

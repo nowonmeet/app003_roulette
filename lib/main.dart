@@ -1,36 +1,55 @@
-import 'dart:io';
-import 'dart:math';
-import 'package:app003_roulette/pages/addEditPage.dart';
 import 'package:app003_roulette/colorFile.dart';
+import 'package:app003_roulette/pages/language_selection_page.dart';
 import 'package:app003_roulette/pages/roulettePage.dart';
-import 'package:app003_roulette/pages/settingPage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter/material.dart';
-import 'package:roulette/roulette.dart';
-import 'dart:math' as math;
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'pages/listPage.dart';
-import 'model/rouletteModel.dart';
 
 void main()  {
-  // WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
 
   WidgetsFlutterBinding.ensureInitialized();
   MobileAds.instance.initialize();
 
-  runApp(const MyApp());
+  runApp( MyApp());
 
 
 
 }
 
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
 
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+
+class _MyAppState extends State<MyApp> {
+  bool _isFirstTime = true;
+  late String _languageCode;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFirstTime();
+  }
+
+  Future<void> _checkFirstTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isFirstTime = prefs.getBool('isFirstTime') ?? true;
+      _languageCode = prefs.getString('languageCode') ?? '';
+    });
+  }
+
+  Future<void> _updateSelectedLanguageCode(String index) async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _languageCode = index;
+      prefs.setString('languageCode', _languageCode);
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -38,28 +57,23 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'ルーレット',
       theme: ThemeData(
-        primarySwatch: OlignalColor.primaryColor,
-//      primarySwatch: Colors.blue,
+         primarySwatch: OlignalColor.primaryColor,
       ),
-      home: const RoulettePage(),
+      home: _isFirstTime
+          ? const LanguageSelectionPage()
+
+
+      //     ? LanguageSelectionPage(
+      //   onItemSelected: (index) {
+      //     _updateSelectedLanguageCode(index);
+      //     Navigator.of(context).pushReplacement(
+      //       MaterialPageRoute(builder: (context) => RoulettePage(languageCode: _languageCode)),
+      //     );
+      //   },
+      // )
+
+          : RoulettePage(languageCode: _languageCode),
     );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold();
   }
 }
 

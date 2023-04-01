@@ -1,3 +1,4 @@
+import 'package:app003_roulette/model/applocalizations.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -6,13 +7,19 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class ContactForm extends StatelessWidget {
-  const ContactForm({Key? key}) : super(key: key);
+  final String _languageCode;
+  ContactForm({Key? key,required String languageCode})
+      : _languageCode = languageCode, super(key: key);
+
+  var appLocalizations = AppLocalizations();
+
 
   //メールでお問合せ用
   final String emailAddress = "now.on.meet.sup@gmail.com";
-  final String emailSubject = "ルーレットお問い合わせ";
-  final String emailBody =
-      "ここから本文を入力して下さい。\n\n\n\n\nアプリ改善に必要な情報: \n(削除しないでください）\n";
+  // final String emailSubject = "ルーレットお問い合わせ";
+  // final String emailBody =
+  //     "ここから本文を入力して下さい。\n\n\n\n\nアプリ改善に必要な情報: \n(削除しないでください）\n";
+
 
   Future<String> getAppInformation() async {
     final packageInfo = await PackageInfo.fromPlatform();
@@ -43,7 +50,7 @@ class ContactForm extends StatelessWidget {
     }
 
     final appInformation =
-        "アプリバージョン: ${packageInfo.version}\n" + "デバイス情報: $deviceData";
+        "app version: ${packageInfo.version}\n" + "device information: $deviceData";
 
     return appInformation;
   }
@@ -53,14 +60,16 @@ class ContactForm extends StatelessWidget {
     return ListTile(
       //メールで問い合わせ
       leading: const Icon(Icons.email),
-      title: const Text('メールでお問合せ'),
+      title:  Text(
+        appLocalizations.getTranslatedValue(_languageCode,'inquiry'),
+      ),
       onTap: () async {
         final Uri emailLaunchUri = Uri(
           scheme: 'mailto',
           path: emailAddress,
           queryParameters: {
-            'subject': emailSubject,
-            'body': emailBody + await getAppInformation(),
+            'subject':appLocalizations.getTranslatedValue(_languageCode,'emailSubject'),
+            'body': appLocalizations.getTranslatedValue(_languageCode,'emailBody') + await getAppInformation(),
             'cursors': '0' // ここでカーソルを本文の先頭に設定します
           },
         );
@@ -69,9 +78,11 @@ class ContactForm extends StatelessWidget {
           await launchUrlString(emailLaunchUri.toString());
         } on PlatformException {
           Clipboard.setData(ClipboardData(text: emailAddress));
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("メーラーアプリが見つかりませんでした。メールアドレスをコピーしました。"),
-            duration: Duration(seconds: 3),
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(
+                appLocalizations.getTranslatedValue(_languageCode,'emailError&Copy')
+            ),
+            duration: const Duration(seconds: 3),
           ));
         }
       },

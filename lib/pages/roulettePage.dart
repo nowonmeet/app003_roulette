@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:app003_roulette/model/adIdManagement.dart';
 import 'package:app003_roulette/model/colorList.dart';
+import 'package:app003_roulette/pages/language_selection_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:roulette/roulette.dart';
@@ -10,12 +11,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import '../model/PartsViewModel.dart';
 import '../model/RouletteViewModel.dart';
+import '../model/applocalizations.dart';
 import '../model/contact_form.dart';
 import 'addEditPage.dart';
 import 'listPage.dart';
 
 class RoulettePage extends StatefulWidget {
-  const RoulettePage({Key? key}) : super(key: key);
+  final String languageCode;
+  const RoulettePage({Key? key, required this.languageCode}) : super(key: key);
 
   @override
   State<RoulettePage> createState() => _RoulettePageState();
@@ -25,6 +28,7 @@ class _RoulettePageState extends State<RoulettePage>
     with TickerProviderStateMixin //アニメーションが２つ以上
 //    with SingleTickerProviderStateMixin //アニメーションが一つだけの場合
 {
+
 
   //変数の初期設定ゾーン
   late RouletteController _controller;
@@ -41,6 +45,9 @@ class _RoulettePageState extends State<RoulettePage>
   var random = math.Random(); //ランダムを生成
   var _resultNumber = 0; //結果選択用
   var _rouletteResult = ''; //結果表示用
+  var _languageCode = 'en'; //言語設定用
+
+  var appLocalizations = AppLocalizations();
 
   //広告用
   // バナー広告をインスタンス化
@@ -76,6 +83,13 @@ class _RoulettePageState extends State<RoulettePage>
     }
   }
 
+  _getLanguage() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _languageCode = prefs.getString('languageCode') ?? 'ja';
+    });
+  }
+  
   Future<void> _refreshJournals() async {
     //データベースの一覧をパーツに登録。画面更新用
     //ルーレットグループの設定も行う。
@@ -115,6 +129,9 @@ class _RoulettePageState extends State<RoulettePage>
     }
   }
 
+  //カウンターを設定する。
+
+
   //初回設定処理
   Future<void> _firstStartup() async {
     await _getFirstStartup();
@@ -140,7 +157,7 @@ class _RoulettePageState extends State<RoulettePage>
   }
 
   Future<void> _addItemFirstStartup() async {//初回起動のみ自動でルーレットを作成する
-    await RouletteViewModel.createItem('サイコロ');
+    await RouletteViewModel.createItem(appLocalizations.getTranslatedValue(widget.languageCode,'dice'));
     await PartsViewModel.createItem(1, '１', 0, 1);
     await PartsViewModel.createItem(1, '２', 1, 1);
     await PartsViewModel.createItem(1, '３', 2, 1);
@@ -241,6 +258,7 @@ class _RoulettePageState extends State<RoulettePage>
       await _getRouletteId();
       await _getTitle(_rouletteId);
       await _reloadRoulette();
+      await _getLanguage();
     });
     super.initState();
     _rouletteResult = '';
@@ -264,145 +282,179 @@ class _RoulettePageState extends State<RoulettePage>
     //AddEditPageへの遷移と、帰ってきた時の処理
     WidgetsFlutterBinding.ensureInitialized();
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: _titleIsLoading
+    return WillPopScope(
+      onWillPop: () async  => false,
+        //戻るボタンを押した時の処理
+//return true; // 画面を閉じる
+      child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          leading: null,
+          backgroundColor: Colors.white,
+          title: _titleIsLoading
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : Text(_rouletteTitle),
+        ),
+        endDrawer: Drawer(
+          child: ListView(
+            children: [
+               DrawerHeader(
+                  decoration: const BoxDecoration(
+                      image:
+                          DecorationImage(
+                            fit: BoxFit.fitHeight,
+                              image: AssetImage('lib/assets/drawer.png')
+                          )),
+                  child: Text(
+                    appLocalizations.getTranslatedValue(_languageCode,'menu'),
+                  ),
+              ),
+              ListTile(
+                title:  Text(
+                    appLocalizations.getTranslatedValue(_languageCode,'privacy_policy'),
+),
+                leading: const Icon(Icons.vpn_key),
+                onTap: () {
+                  _privacyPolicyURL();
+                  Navigator.pop(context); //Drawerを閉じる
+                },
+              ),
+              ContactForm(languageCode: _languageCode),
+
+              ListTile(
+                title:  Text(
+                  appLocalizations.getTranslatedValue(_languageCode,'languageSelect'),
+                ),
+                leading: const Icon(Icons.language),
+                onTap: () {
+                  //LanguageSelectionPageに移動する。
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LanguageSelectionPage(),
+                    ),
+                  );
+
+
+                },
+              ),
+
+            ],
+          ),
+        ),
+        body: _isLoading
             ? const Center(
                 child: CircularProgressIndicator(),
               )
-            : Text(_rouletteTitle),
-      ),
-      endDrawer: Drawer(
-        child: ListView(
-          children: [
-            const DrawerHeader(
-                decoration: BoxDecoration(
-                    image:
-                        DecorationImage(
-                          fit: BoxFit.fitHeight,
-                            image: AssetImage('lib/assets/drawer.png')
-                        )),
-                child: Text('メニュー')),
-            ListTile(
-              title: const Text('プライバシーポリシー'),
-              leading: const Icon(Icons.vpn_key),
-              onTap: () {
-                _privacyPolicyURL();
-                Navigator.pop(context); //Drawerを閉じる
-              },
-            ),
-            const ContactForm(),
-          ],
-        ),
-      ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : Center(
-              child: Column(
-                children: <Widget>[
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          _rouletteResult = '';
-                          pushWithReloadByReturnListPage(context);
-                        },
-                        icon: const Icon(Icons.list),
-                        iconSize: 48,
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          _rouletteResult = '';
-                          pushWithReloadByReturnAddEditPage(context);
-                        },
-                        icon: const Icon(Icons.edit),
-                        iconSize: 48,
-                      ),
-                      Expanded(child: Container()),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20.0, bottom: 20),
-                    child: Row(
+            : Center(
+                child: Column(
+                  children: <Widget>[
+                    Row(
                       children: [
-                        const Padding(
-                          padding: EdgeInsets.only(left: 8.0, right: 12.0),
-                          child: Text(
-                            '抽選結果：',
-                            style: TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
+                        IconButton(
+                          onPressed: () {
+                            _rouletteResult = '';
+                            pushWithReloadByReturnListPage(context);
+                          },
+                          icon: const Icon(Icons.list),
+                          iconSize: 48,
                         ),
-                        Text(
-                          _rouletteResult,
-                          style: const TextStyle(fontSize: 24),
+                        IconButton(
+                          onPressed: () {
+                            _rouletteResult = '';
+                            pushWithReloadByReturnAddEditPage(context);
+                          },
+                          icon: const Icon(Icons.edit),
+                          iconSize: 48,
                         ),
+                        Expanded(child: Container()),
                       ],
                     ),
-                  ),
-                  Stack(alignment: Alignment.topCenter, children: [
                     Padding(
-                      padding: const EdgeInsets.all(48.0),
-                      child: Roulette(
-                        controller: _controller,
-                        style: const RouletteStyle(
-                          dividerThickness: 2, //区切り線の幅
-                          centerStickSizePercent: 0.3, //真ん中の円の割合
-                          centerStickerColor: Colors.white, //真ん中の円の色
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SizedBox(
-                        width: 30,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            side: const BorderSide(color: Colors.grey, width: 1),
-                            elevation: 10,
-                            shape: const BeveledRectangleBorder(
-                              borderRadius: BorderRadius.only(
-                                  bottomRight: Radius.circular(double.infinity),
-                                  bottomLeft: Radius.circular(double.infinity)),
+                      padding: const EdgeInsets.only(top: 20.0, bottom: 20),
+                      child: Row(
+                        children: [
+                           Padding(
+                            padding: const EdgeInsets.only(left: 8.0, right: 12.0),
+                            child: Text(
+                              appLocalizations.getTranslatedValue(_languageCode,'result'),
+
+                              style: const TextStyle(
+                                fontSize: 16,
+                              ),
                             ),
                           ),
-                          child: const Text(''),
-                        ),
+                          Text(
+                            _rouletteResult,
+                            style: const TextStyle(fontSize: 24),
+                          ),
+                        ],
                       ),
                     ),
-                  ]),
-                  // Text(_parts.toString()),
-                  // Text(_ratioList.toString()),
-                  Expanded(child: Container()),
+                    Stack(alignment: Alignment.topCenter, children: [
+                      Padding(
+                        padding: const EdgeInsets.all(48.0),
+                        child: Roulette(
+                          controller: _controller,
+                          style: const RouletteStyle(
+                            dividerThickness: 2, //区切り線の幅
+                            centerStickSizePercent: 0.3, //真ん中の円の割合
+                            centerStickerColor: Colors.white, //真ん中の円の色
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SizedBox(
+                          width: 30,
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              side: const BorderSide(color: Colors.grey, width: 1),
+                              elevation: 10,
+                              shape: const BeveledRectangleBorder(
+                                borderRadius: BorderRadius.only(
+                                    bottomRight: Radius.circular(double.infinity),
+                                    bottomLeft: Radius.circular(double.infinity)),
+                              ),
+                            ),
+                            child: const Text(''),
+                          ),
+                        ),
+                      ),
+                    ]),
+                    // Text(_parts.toString()),
+                    // Text(_ratioList.toString()),
+                    Expanded(child: Container()),
 
-                  adContainer,
-                ],
+                    adContainer,
+
+
+                  ],
+                ),
               ),
-            ),
-      floatingActionButton: Container(
-        margin: const EdgeInsets.only(bottom: 48.0),
-        child: FloatingActionButton(
-          backgroundColor: Colors.white,
-          onPressed: () async {
-            _displayReset(); //結果表示をリセット
-            _resultNumber = getRandomIndex(_ratioList);
-            await _controller.rollTo(
-              //結果の選択（ランダムで選択）
-              _resultNumber,
-              clockwise: _clockwise,
-              offset: Random().nextDouble(), //項目内のずれ。1以上にすると別の項目に止まる
-            );
+        floatingActionButton: Container(
+          margin: const EdgeInsets.only(bottom: 48.0),
+          child: FloatingActionButton(
+            backgroundColor: Colors.white,
+            onPressed: () async {
+              _displayReset(); //結果表示をリセット
+              _resultNumber = getRandomIndex(_ratioList);
+              await _controller.rollTo(
+                //結果の選択（ランダムで選択）
+                _resultNumber,
+                clockwise: _clockwise,
+                offset: Random().nextDouble(), //項目内のずれ。1以上にすると別の項目に止まる
+              );
 
-            _resultDisplay();
-          },
-          child: const Icon(Icons.refresh_rounded),
+              _resultDisplay();
+            },
+            child: const Icon(Icons.refresh_rounded),
+          ),
         ),
       ),
     );

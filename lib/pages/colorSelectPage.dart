@@ -1,6 +1,8 @@
 
+import 'package:app003_roulette/model/applocalizations.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../model/PartsViewModel.dart';
 import '../model/adIdManagement.dart';
 import '../model/colorList.dart';
@@ -24,6 +26,16 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
     request: const AdRequest(),
     listener: const BannerAdListener(),
   );
+
+  var appLocalizations = AppLocalizations();//多言語対応用
+  var _languageCode = 'en'; //言語設定用
+
+  _getLanguage() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _languageCode = prefs.getString('languageCode') ?? 'ja';
+    });
+  }
 
   final _colorSelectList= ColorList().colorSelectList;
 
@@ -75,7 +87,9 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
 
     Future(() async {
       await _refreshJournals();
+      await _getLanguage();
       _addUsedColors();
+
     });
 
     super.initState();
@@ -101,7 +115,7 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text('色選択'),
+        title: Text(appLocalizations.getTranslatedValue(_languageCode,'colorTitle')),
       ),
       body: _isLoading
           ? const Center(

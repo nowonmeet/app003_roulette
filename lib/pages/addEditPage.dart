@@ -1,10 +1,12 @@
 import 'dart:math' as math;
 import 'package:app003_roulette/model/RouletteViewModel.dart';
+import 'package:app003_roulette/model/applocalizations.dart';
 import 'package:app003_roulette/pages/colorSelectPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../model/PartsViewModel.dart';
 import '../model/adIdManagement.dart';
 import '../model/colorList.dart';
@@ -29,6 +31,18 @@ class _AddEditPageState extends State<AddEditPage>
     request: const AdRequest(),
     listener: const BannerAdListener(),
   );
+
+  var appLocalizations = AppLocalizations();//多言語対応用
+  var _languageCode = 'en'; //言語設定用
+
+  _getLanguage() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _languageCode = prefs.getString('languageCode') ?? 'ja';
+    });
+  }
+
+
 
   late List<TextEditingController> itemNameController;
   late List<TextEditingController> ratioController;
@@ -109,6 +123,7 @@ class _AddEditPageState extends State<AddEditPage>
       await _getTitle();
       await _initTextController();
       await _setTextController();
+      await _getLanguage();
       _isLoading = false;
     });
   }
@@ -228,8 +243,8 @@ class _AddEditPageState extends State<AddEditPage>
                         isDense: true,
                         //テキストフィールドの高さを低く設定できる
                         counterText: "",
-                        labelText: 'ルーレットタイトル（最大12文字）',
-                        hintText: 'ルーレットタイトルを入力',
+                        labelText: appLocalizations.getTranslatedValue(_languageCode,'titleEdit'),
+                        hintText: appLocalizations.getTranslatedValue(_languageCode,'titleHintText'),
                         hintStyle: const TextStyle(
                             fontSize: 12, color: Colors.black45),
                         fillColor: Colors.white,
@@ -302,11 +317,11 @@ class _AddEditPageState extends State<AddEditPage>
                             ),
                           ),
                         ),
-                        const Opacity(
+                         Opacity(
                           opacity: 0.1,
                           child: Text(
-                            'プレビュー',
-                            style: TextStyle(
+                            appLocalizations.getTranslatedValue(_languageCode,'preview'),
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 48,
                             ),
@@ -364,8 +379,8 @@ class _AddEditPageState extends State<AddEditPage>
                                                     MaxLengthEnforcement
                                                         .enforced,
                                                 decoration: InputDecoration(
-                                                  labelText: '項目名（最大8文字）',
-                                                  hintText: '項目を入力',
+                                                  labelText: appLocalizations.getTranslatedValue(_languageCode,'partsEdit'),
+                                                  hintText: appLocalizations.getTranslatedValue(_languageCode,'partsHintText'),
                                                   hintStyle: const TextStyle(
                                                       fontSize: 12,
                                                       color: Colors.black45),
@@ -439,7 +454,7 @@ class _AddEditPageState extends State<AddEditPage>
                                                     ratioController[index],
                                                 cursorColor: Colors.black12,
                                                 decoration: InputDecoration(
-                                                  labelText: '比率',
+                                                  labelText: appLocalizations.getTranslatedValue(_languageCode,'ratioEdit'),
                                                   hintText: '$index ',
                                                   hintStyle: const TextStyle(
                                                       fontSize: 12,
@@ -502,9 +517,11 @@ class _AddEditPageState extends State<AddEditPage>
                                                       builder: (context) {
                                                         return AlertDialog(
                                                           title:
-                                                              const Text('注意'),
-                                                          content: const Text(
-                                                              '項目は2つ以上必要です。'),
+                                                          Text(appLocalizations.getTranslatedValue(_languageCode,'attention')),
+                                                          content: Text(
+                                                        appLocalizations.getTranslatedValue(_languageCode,'partsAttention'),
+
+                                                          ),
                                                           actions: [
                                                             TextButton(
                                                                 onPressed: () =>
