@@ -156,9 +156,9 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
                                       Navigator.pop(context, true);
                                     },
                                     style: ElevatedButton.styleFrom(
-                                        primary: Colors.transparent,
-                                        elevation: 0,
-                                        onPrimary: Colors.black45),
+                                        foregroundColor: Colors.black45,
+                                        backgroundColor: Colors.transparent,
+                                        elevation: 0),
                                     child: const Text(''),
                                   ),
                                 )
