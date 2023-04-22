@@ -86,7 +86,7 @@ class _RoulettePageState extends State<RoulettePage>
   _getLanguage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _languageCode = prefs.getString('languageCode') ?? 'ja';
+      _languageCode = prefs.getString('languageCode') ?? 'en';
     });
   }
   
@@ -103,7 +103,7 @@ class _RoulettePageState extends State<RoulettePage>
               color: _colorSelectList[_parts[i]['color']],
               weight: _parts[i]['ratio'] / 10, //見た目の比率
               textStyle: const TextStyle(
-                fontSize: 12,
+                fontSize: 14,
                 shadows: <Shadow>[
                   Shadow(
                     color: Colors.black,
@@ -202,12 +202,20 @@ class _RoulettePageState extends State<RoulettePage>
   }
 
   _privacyPolicyURL() async {
-    //プライバシーポリシーに遷移
-    const url = "https://fir-memo-90c4e.web.app";
-    if (await canLaunchUrlString(url)) {
-      await launchUrlString(url);
+
+    String _privacyPolicyURLString = 'https://fir-memo-90c4e.web.app/';
+    //言語に応じてURLを変更する。
+    if(_languageCode == 'ja') {
+      _privacyPolicyURLString = 'https://fir-memo-90c4e.web.app/';
     } else {
-      throw 'Could not Launch $url';
+      _privacyPolicyURLString = 'https://service-agreement-now-on-meet.web.app/';
+    }
+
+    //プライバシーポリシーに遷移
+    if (await canLaunchUrlString(_privacyPolicyURLString)) {
+      await launchUrlString(_privacyPolicyURLString);
+    } else {
+      throw 'Could not Launch $_privacyPolicyURLString';
     }
   }
 
@@ -382,7 +390,7 @@ class _RoulettePageState extends State<RoulettePage>
                               appLocalizations.getTranslatedValue(_languageCode,'result'),
 
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 18,
                               ),
                             ),
                           ),

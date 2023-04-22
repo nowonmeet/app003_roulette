@@ -35,7 +35,7 @@ class _AddEditPageState extends State<AddEditPage>
   var appLocalizations = AppLocalizations();//多言語対応用
   var _languageCode = 'en'; //言語設定用
 
-  _getLanguage() async {
+  _getLanguage() async {//言語設定を取得
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _languageCode = prefs.getString('languageCode') ?? 'ja';
@@ -81,7 +81,7 @@ class _AddEditPageState extends State<AddEditPage>
     }
   }
 
-  _initTextController() {
+  _initTextController() {//テキストコントローラーの初期化
     itemNameController =
         List.generate(_parts.length, (index) => TextEditingController());
 
@@ -91,7 +91,7 @@ class _AddEditPageState extends State<AddEditPage>
     titleController.text = rouletteTitle;
   }
 
-  _setTextController() {
+  _setTextController() {//テキストコントローラーに値をセット
     for (var i = 0; i < _parts.length; i++) {
       itemNameController[i].text = _parts[i]['name'];
       ratioController[i].text = _parts[i]['ratio'].toString();
@@ -110,12 +110,28 @@ class _AddEditPageState extends State<AddEditPage>
     return math.Random().nextInt(_colorSelectList.length);
   }
 
-  final _colorSelectList= ColorList().colorSelectList;
+  final _colorSelectList= ColorList().colorSelectList;//カラーリスト
+
+  //言語設定に応じてmaxLengthの値を変える処理
+  var titleMaxLength = 24;
+  var itemNameMaxLength = 16;
+
+  void _getMaxLength() {
+    if (_languageCode == 'ja') {
+      titleMaxLength = 24;
+      itemNameMaxLength = 16;
+    } else {
+      titleMaxLength = 12;
+      itemNameMaxLength = 8;
+    }
+  }
+
 
   @override
   void initState() {
     rouletteTitle = '';
     super.initState();
+    _getLanguage();
 
     Future(() async {
       await _refreshJournals();
@@ -233,7 +249,7 @@ class _AddEditPageState extends State<AddEditPage>
                     child: TextFormField(
                       controller: titleController,
                       cursorColor: Colors.black12,
-                      maxLength: 12,
+                      maxLength: titleMaxLength,
                       maxLengthEnforcement: MaxLengthEnforcement.enforced,
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(
@@ -374,7 +390,7 @@ class _AddEditPageState extends State<AddEditPage>
                                                 controller:
                                                     itemNameController[index],
                                                 cursorColor: Colors.black12,
-                                                maxLength: 8,
+                                                maxLength: itemNameMaxLength,
                                                 maxLengthEnforcement:
                                                     MaxLengthEnforcement
                                                         .enforced,
@@ -435,7 +451,13 @@ class _AddEditPageState extends State<AddEditPage>
                                                 left: 4.0),
                                             child: Focus(
                                               child: TextFormField(
-//                                              textInputAction: TextInputAction.next,
+
+                                                maxLength: 3,
+                                                maxLengthEnforcement:
+                                                MaxLengthEnforcement
+                                                    .enforced,
+
+
                                                 onTap: () {
                                                   //選択時に全選択
                                                   ratioController[index]
@@ -460,6 +482,7 @@ class _AddEditPageState extends State<AddEditPage>
                                                       fontSize: 12,
                                                       color: Colors.black45),
                                                   fillColor: Colors.white,
+                                                  counterText: "",
                                                   filled: true,
                                                   focusedBorder:
                                                       OutlineInputBorder(

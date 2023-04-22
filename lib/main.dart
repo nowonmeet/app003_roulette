@@ -1,4 +1,5 @@
 import 'package:app003_roulette/colorFile.dart';
+import 'package:app003_roulette/model/applocalizations.dart';
 import 'package:app003_roulette/pages/language_selection_page.dart';
 import 'package:app003_roulette/pages/roulettePage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -26,19 +27,27 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool _isFirstTime = true;
-  late String _languageCode;
+  var _languageCode = 'en'; //言語設定用
+
+  var appLocalizations = AppLocalizations();//多言語対応用
+
 
   @override
   void initState() {
     super.initState();
-    _checkFirstTime();
+
+    Future(() async {
+      await _checkFirstTime();
+    });
+
+
   }
 
   Future<void> _checkFirstTime() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _isFirstTime = prefs.getBool('isFirstTime') ?? true;
-      _languageCode = prefs.getString('languageCode') ?? '';
+      _languageCode = prefs.getString('languageCode') ?? 'en';
     });
   }
 
@@ -51,16 +60,19 @@ class _MyAppState extends State<MyApp> {
   }
 
 
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'ルーレット',
+      //アプリ一覧画面起動時のタイトル
+      title: appLocalizations.getTranslatedValue(_languageCode,'title'),
       theme: ThemeData(
          primarySwatch: OlignalColor.primaryColor,
       ),
       home: _isFirstTime
           ? const LanguageSelectionPage()
+            : RoulettePage(languageCode: _languageCode)
 
 
       //     ? LanguageSelectionPage(
@@ -72,7 +84,6 @@ class _MyAppState extends State<MyApp> {
       //   },
       // )
 
-          : RoulettePage(languageCode: _languageCode),
     );
   }
 }

@@ -2,11 +2,13 @@ class AppLocalizations {
 
 static final Map<String, Map<String, String>> _localizedValues = {
   'en': {
+    //起動アプリ一覧で表示するタイトル
+    'title': 'Roulette',
+
     //初回起動時の説明
     'dice': 'Dice',
 
     //ルーレットページ
-    'title': 'Roulette App',
     'spin': 'Spin',
     'result': 'Result:',
     'menu': 'Menu',
@@ -30,9 +32,9 @@ static final Map<String, Map<String, String>> _localizedValues = {
 
 
     //ルーレット編集
-    'titleEdit': 'Roulette Title (Max 12 chars)',
+    'titleEdit': 'Roulette Title (Max 24 chars)',
     'titleHintText': 'Please enter the title.',
-    'partsEdit': 'Item Name (Max 8 chars)',
+    'partsEdit': 'Item Name (Max 16 chars)',
     'partsHintText': 'Please enter the item name.',
     'partsAttention': 'Item name is required at least two.',
     'ratioEdit': 'Ratio',
@@ -43,11 +45,13 @@ static final Map<String, Map<String, String>> _localizedValues = {
 
   },
   'ja': {
+    //起動アプリ一覧で表示するタイトル
+    'title': 'ルーレット',
+
     //初回起動時の説明
     'dice': 'サイコロ',
 
     //ルーレットページ
-    'title': 'ルーレットアプリ',
     'spin': 'スピン',
     'result': '抽選結果:',
     'menu': 'メニュー',
