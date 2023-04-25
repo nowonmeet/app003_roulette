@@ -32,17 +32,16 @@ class _AddEditPageState extends State<AddEditPage>
     listener: const BannerAdListener(),
   );
 
-  var appLocalizations = AppLocalizations();//多言語対応用
+  var appLocalizations = AppLocalizations(); //多言語対応用
   var _languageCode = 'en'; //言語設定用
 
-  _getLanguage() async {//言語設定を取得
+  _getLanguage() async {
+    //言語設定を取得
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _languageCode = prefs.getString('languageCode') ?? 'ja';
     });
   }
-
-
 
   late List<TextEditingController> itemNameController;
   late List<TextEditingController> ratioController;
@@ -81,7 +80,8 @@ class _AddEditPageState extends State<AddEditPage>
     }
   }
 
-  _initTextController() {//テキストコントローラーの初期化
+  _initTextController() {
+    //テキストコントローラーの初期化
     itemNameController =
         List.generate(_parts.length, (index) => TextEditingController());
 
@@ -91,7 +91,8 @@ class _AddEditPageState extends State<AddEditPage>
     titleController.text = rouletteTitle;
   }
 
-  _setTextController() {//テキストコントローラーに値をセット
+  _setTextController() {
+    //テキストコントローラーに値をセット
     for (var i = 0; i < _parts.length; i++) {
       itemNameController[i].text = _parts[i]['name'];
       ratioController[i].text = _parts[i]['ratio'].toString();
@@ -110,7 +111,7 @@ class _AddEditPageState extends State<AddEditPage>
     return math.Random().nextInt(_colorSelectList.length);
   }
 
-  final _colorSelectList= ColorList().colorSelectList;//カラーリスト
+  final _colorSelectList = ColorList().colorSelectList; //カラーリスト
 
   //言語設定に応じてmaxLengthの値を変える処理
   var titleMaxLength = 24;
@@ -118,14 +119,13 @@ class _AddEditPageState extends State<AddEditPage>
 
   void _getMaxLength() {
     if (_languageCode == 'ja') {
-      titleMaxLength = 24;
-      itemNameMaxLength = 16;
-    } else {
       titleMaxLength = 12;
       itemNameMaxLength = 8;
+    } else {
+      titleMaxLength = 24;
+      itemNameMaxLength = 16;
     }
   }
-
 
   @override
   void initState() {
@@ -140,6 +140,7 @@ class _AddEditPageState extends State<AddEditPage>
       await _initTextController();
       await _setTextController();
       await _getLanguage();
+      _getMaxLength();
       _isLoading = false;
     });
   }
@@ -205,16 +206,19 @@ class _AddEditPageState extends State<AddEditPage>
 
   var bottomSpace = 0.0;
 
+  final _focusNode = FocusNode(); //フォーカス用
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size; //画面サイズで指定用
-    bottomSpace = 0;// この行がないとキーボードをしまう時にオーバーフローが発生
+    bottomSpace = 0; // この行がないとキーボードをしまう時にオーバーフローが発生
 
     if (MediaQuery.of(context).viewInsets.bottom != 0) {
       // キーボードが出ている時
       paddingBottom = 0;
       bottomSpace = MediaQuery.of(context).viewInsets.bottom - 60;
-    }else{// キーボードが出ていない時
+    } else {
+      // キーボードが出ていない時
       paddingBottom = 60.0;
       bottomSpace = 0.0;
     }
@@ -232,7 +236,6 @@ class _AddEditPageState extends State<AddEditPage>
     );
 
     //帰ってきた時の処理
-
 
     return Focus(
       focusNode: focusNode,
@@ -259,8 +262,10 @@ class _AddEditPageState extends State<AddEditPage>
                         isDense: true,
                         //テキストフィールドの高さを低く設定できる
                         counterText: "",
-                        labelText: appLocalizations.getTranslatedValue(_languageCode,'titleEdit'),
-                        hintText: appLocalizations.getTranslatedValue(_languageCode,'titleHintText'),
+                        labelText: appLocalizations.getTranslatedValue(
+                            _languageCode, 'titleEdit'),
+                        hintText: appLocalizations.getTranslatedValue(
+                            _languageCode, 'titleHintText'),
                         hintStyle: const TextStyle(
                             fontSize: 12, color: Colors.black45),
                         fillColor: Colors.white,
@@ -291,7 +296,10 @@ class _AddEditPageState extends State<AddEditPage>
                   ),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
-              onPressed: () => Navigator.pop(context, true),
+              onPressed: () {
+                _focusNode.unfocus(); // フォーカスを外す
+                Navigator.pop(context, true);
+              },
             ),
           ),
           resizeToAvoidBottomInset: false,
@@ -299,286 +307,302 @@ class _AddEditPageState extends State<AddEditPage>
               ? const Center(
                   child: CircularProgressIndicator(),
                 )
-              : Center(
-                  child: Column(
-                    children: <Widget>[
-                      Stack(alignment: AlignmentDirectional.center, children: [
-                        SizedBox(
-                          width: double.infinity,
-                          height: screenSize.height * 0.25,
+              : GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              _focusNode.unfocus(); // フォーカスを外す
+            },
+                child: Center(
+                    child: Column(
+                      children: <Widget>[
+                        Stack(alignment: AlignmentDirectional.center, children: [
+                          SizedBox(
+                            width: double.infinity,
+                            height: screenSize.height * 0.25,
 //                  height: 200,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: PieChart(
-                              PieChartData(
-                                  sectionsSpace: 1,
-                                  centerSpaceRadius: screenSize.height * 0.03,
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: PieChart(
+                                PieChartData(
+                                    sectionsSpace: 1,
+                                    centerSpaceRadius: screenSize.height * 0.03,
 //                        centerSpaceRadius: 20,
-                                  centerSpaceColor: Colors.white,
-                                  startDegreeOffset: 270,
-                                  sections: [
-                                    for (var i = 0; i < _parts.length; i++)
-                                      PieChartSectionData(
-                                        color: _colorSelectList[_parts[i]
-                                            ['color']],
-                                        value: _parts[i]['ratio'] / 10,
-                                        radius: 60,
-                                        title: _parts[i]['name'],
-                                        titleStyle: const TextStyle(
-                                          fontSize: 8,
-                                          overflow: TextOverflow.ellipsis,
+                                    centerSpaceColor: Colors.white,
+                                    startDegreeOffset: 270,
+                                    sections: [
+                                      for (var i = 0; i < _parts.length; i++)
+                                        PieChartSectionData(
+                                          color: _colorSelectList[_parts[i]
+                                              ['color']],
+                                          value: _parts[i]['ratio'] / 10,
+                                          radius: 60,
+                                          title: _parts[i]['name'],
+                                          titleStyle: const TextStyle(
+                                            fontSize: 8,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ),
-                                      ),
-                                  ]),
+                                    ]),
+                              ),
                             ),
                           ),
-                        ),
-                         Opacity(
-                          opacity: 0.1,
-                          child: Text(
-                            appLocalizations.getTranslatedValue(_languageCode,'preview'),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 48,
+                          Opacity(
+                            opacity: 0.1,
+                            child: Text(
+                              appLocalizations.getTranslatedValue(
+                                  _languageCode, 'preview'),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 48,
+                              ),
                             ),
-                          ),
-                        )
-                      ]),
-                      SingleChildScrollView(
-                        child: SizedBox(
-                          height: screenSize.height * 0.52 - bottomSpace,
+                          )
+                        ]),
+                        SingleChildScrollView(
+                          child: SizedBox(
+                            height: screenSize.height * 0.52 - bottomSpace,
 //                  height: 300,
-                          width: double.infinity,
-                          child: ListView.builder(
-                              controller: _scrollController,
-                              itemCount: _parts.length,
-                              padding: EdgeInsets.only(bottom : paddingBottom),
-                              itemBuilder: (BuildContext context, int index) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  child: Container(
-                                    height: 80,
-                                    color: Colors.white,
-                                    child: Row(
-                                      children: [
-                                        // Icon(//ドラッグで移動用
-                                        //   Icons.drag_indicator,
-                                        //   size: 40,
-                                        // ),
-                                        SizedBox(
-                                          height: 60,
-                                          width: 40,
-                                          child: ElevatedButton(
-                                            onPressed: () {
-                                              pushWithReloadByReturn(
-                                                  context, index);
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: _colorSelectList[
-                                                  _parts[index]['color']],
+                            width: double.infinity,
+                            child: ListView.builder(
+                                controller: _scrollController,
+                                itemCount: _parts.length,
+                                padding: EdgeInsets.only(bottom: paddingBottom),
+                                itemBuilder: (BuildContext context, int index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Container(
+                                      height: 80,
+                                      color: Colors.white,
+                                      child: Row(
+                                        children: [
+                                          // Icon(//ドラッグで移動用
+                                          //   Icons.drag_indicator,
+                                          //   size: 40,
+                                          // ),
+                                          SizedBox(
+                                            height: 60,
+                                            width: 40,
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                pushWithReloadByReturn(
+                                                    context, index);
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: _colorSelectList[
+                                                    _parts[index]['color']],
+                                              ),
+                                              child: null,
                                             ),
-                                            child: null,
                                           ),
-                                        ),
-                                        Expanded(
-                                          //項目名
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Focus(
-                                              child: TextFormField(
+                                          Expanded(
+                                            //項目名
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: Focus(
+                                                child: TextFormField(
 //                                              textInputAction: TextInputAction.next,
-                                                controller:
-                                                    itemNameController[index],
-                                                cursorColor: Colors.black12,
-                                                maxLength: itemNameMaxLength,
-                                                maxLengthEnforcement:
-                                                    MaxLengthEnforcement
-                                                        .enforced,
-                                                decoration: InputDecoration(
-                                                  labelText: appLocalizations.getTranslatedValue(_languageCode,'partsEdit'),
-                                                  hintText: appLocalizations.getTranslatedValue(_languageCode,'partsHintText'),
-                                                  hintStyle: const TextStyle(
-                                                      fontSize: 12,
-                                                      color: Colors.black45),
-                                                  fillColor: Colors.white,
-                                                  filled: true,
-                                                  counterText: "",
-                                                  focusedBorder:
-                                                      OutlineInputBorder(
-                                                    //フォーカスした時の挙動
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                    borderSide:
-                                                        const BorderSide(
-                                                      color: Colors.black45,
-                                                      width: 2.0,
+                                                  controller:
+                                                      itemNameController[index],
+                                                  cursorColor: Colors.black12,
+                                                  maxLength: itemNameMaxLength,
+                                                  maxLengthEnforcement:
+                                                      MaxLengthEnforcement
+                                                          .enforced,
+                                                  decoration: InputDecoration(
+                                                    labelText: appLocalizations
+                                                        .getTranslatedValue(
+                                                            _languageCode,
+                                                            'partsEdit'),
+                                                    hintText: appLocalizations
+                                                        .getTranslatedValue(
+                                                            _languageCode,
+                                                            'partsHintText'),
+                                                    hintStyle: const TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.black45),
+                                                    fillColor: Colors.white,
+                                                    filled: true,
+                                                    counterText: "",
+                                                    focusedBorder:
+                                                        OutlineInputBorder(
+                                                      //フォーカスした時の挙動
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                      borderSide:
+                                                          const BorderSide(
+                                                        color: Colors.black45,
+                                                        width: 2.0,
+                                                      ),
                                                     ),
-                                                  ),
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                    borderSide:
-                                                        const BorderSide(
-                                                      color: Colors.black45,
-                                                      width: 1.0,
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                      borderSide:
+                                                          const BorderSide(
+                                                        color: Colors.black45,
+                                                        width: 1.0,
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
-                                              ),
-                                              onFocusChange: (hasFocus) {
-                                                if (!hasFocus) {
-                                                  //フォーカスが外れた時の処理
-                                                  _updateItem(
-                                                      _parts[index]['id'],
-                                                      itemNameController[index]
-                                                          .text,
-                                                      int.parse(
-                                                          ratioController[index]
-                                                              .text));
-                                                }
-                                              },
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          //比率
-                                          width: 60,
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 4.0),
-                                            child: Focus(
-                                              child: TextFormField(
-
-                                                maxLength: 3,
-                                                maxLengthEnforcement:
-                                                MaxLengthEnforcement
-                                                    .enforced,
-
-
-                                                onTap: () {
-                                                  //選択時に全選択
-                                                  ratioController[index]
-                                                          .selection =
-                                                      TextSelection(
-                                                          baseOffset: 0,
-                                                          extentOffset:
-                                                              ratioController[
-                                                                      index]
-                                                                  .text
-                                                                  .length);
+                                                onFocusChange: (hasFocus) {
+                                                  if (!hasFocus) {
+                                                    //フォーカスが外れた時の処理
+                                                    _updateItem(
+                                                        _parts[index]['id'],
+                                                        itemNameController[index]
+                                                            .text,
+                                                        int.parse(
+                                                            ratioController[index]
+                                                                .text));
+                                                  }
                                                 },
-                                                keyboardType:
-                                                    TextInputType.number,
-                                                controller:
-                                                    ratioController[index],
-                                                cursorColor: Colors.black12,
-                                                decoration: InputDecoration(
-                                                  labelText: appLocalizations.getTranslatedValue(_languageCode,'ratioEdit'),
-                                                  hintText: '$index ',
-                                                  hintStyle: const TextStyle(
-                                                      fontSize: 12,
-                                                      color: Colors.black45),
-                                                  fillColor: Colors.white,
-                                                  counterText: "",
-                                                  filled: true,
-                                                  focusedBorder:
-                                                      OutlineInputBorder(
-                                                    //フォーカスした時の挙動
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                    borderSide:
-                                                        const BorderSide(
-                                                      color: Colors.black45,
-                                                      width: 2.0,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            //比率
+                                            width: 60,
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 4.0),
+                                              child: Focus(
+                                                child: TextFormField(
+                                                  maxLength: 3,
+                                                  maxLengthEnforcement:
+                                                      MaxLengthEnforcement
+                                                          .enforced,
+                                                  onTap: () {
+                                                    //選択時に全選択
+                                                    ratioController[index]
+                                                            .selection =
+                                                        TextSelection(
+                                                            baseOffset: 0,
+                                                            extentOffset:
+                                                                ratioController[
+                                                                        index]
+                                                                    .text
+                                                                    .length);
+                                                  },
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  controller:
+                                                      ratioController[index],
+                                                  cursorColor: Colors.black12,
+                                                  decoration: InputDecoration(
+                                                    labelText: appLocalizations
+                                                        .getTranslatedValue(
+                                                            _languageCode,
+                                                            'ratioEdit'),
+                                                    hintText: '$index ',
+                                                    hintStyle: const TextStyle(
+                                                        fontSize: 12,
+                                                        color: Colors.black45),
+                                                    fillColor: Colors.white,
+                                                    counterText: "",
+                                                    filled: true,
+                                                    focusedBorder:
+                                                        OutlineInputBorder(
+                                                      //フォーカスした時の挙動
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                      borderSide:
+                                                          const BorderSide(
+                                                        color: Colors.black45,
+                                                        width: 2.0,
+                                                      ),
                                                     ),
-                                                  ),
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                    borderSide:
-                                                        const BorderSide(
-                                                      color: Colors.black45,
-                                                      width: 1.0,
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                      borderSide:
+                                                          const BorderSide(
+                                                        color: Colors.black45,
+                                                        width: 1.0,
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
+                                                onFocusChange: (hasFocus) {
+                                                  if (!hasFocus) {
+                                                    //フォーカスが外れた時の処理
+                                                    _updateItem(
+                                                        _parts[index]['id'],
+                                                        itemNameController[index]
+                                                            .text,
+                                                        int.parse(
+                                                            ratioController[index]
+                                                                .text));
+                                                  }
+                                                },
                                               ),
-                                              onFocusChange: (hasFocus) {
-                                                if (!hasFocus) {
-                                                  //フォーカスが外れた時の処理
-                                                  _updateItem(
-                                                      _parts[index]['id'],
-                                                      itemNameController[index]
-                                                          .text,
-                                                      int.parse(
-                                                          ratioController[index]
-                                                              .text));
-                                                }
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(right: 8.0),
+                                            child: IconButton(
+                                              icon: const Icon(
+                                                Icons.delete,
+                                                size: 40,
+                                              ),
+                                              onPressed: () {
+                                                _parts.length <= 2
+                                                    ? showDialog(
+                                                        context: context,
+                                                        barrierDismissible: false,
+                                                        builder: (context) {
+                                                          return AlertDialog(
+                                                            title: Text(appLocalizations
+                                                                .getTranslatedValue(
+                                                                    _languageCode,
+                                                                    'attention')),
+                                                            content: Text(
+                                                              appLocalizations
+                                                                  .getTranslatedValue(
+                                                                      _languageCode,
+                                                                      'partsAttention'),
+                                                            ),
+                                                            actions: [
+                                                              TextButton(
+                                                                  onPressed: () =>
+                                                                      Navigator.pop(
+                                                                          context),
+                                                                  child:
+                                                                      const Text(
+                                                                    'OK',
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .black),
+                                                                  ))
+                                                            ],
+                                                          );
+                                                        },
+                                                      ) //アラートを表示
+                                                    : _deleteItem(
+                                                        _parts[index]['id']);
                                               },
                                             ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 8.0),
-                                          child: IconButton(
-                                            icon: const Icon(
-                                              Icons.delete,
-                                              size: 40,
-                                            ),
-                                            onPressed: () {
-                                              _parts.length <= 2
-                                                  ? showDialog(
-                                                      context: context,
-                                                      barrierDismissible: false,
-                                                      builder: (context) {
-                                                        return AlertDialog(
-                                                          title:
-                                                          Text(appLocalizations.getTranslatedValue(_languageCode,'attention')),
-                                                          content: Text(
-                                                        appLocalizations.getTranslatedValue(_languageCode,'partsAttention'),
-
-                                                          ),
-                                                          actions: [
-                                                            TextButton(
-                                                                onPressed: () =>
-                                                                    Navigator.pop(
-                                                                        context),
-                                                                child:
-                                                                    const Text(
-                                                                  'OK',
-                                                                  style: TextStyle(
-                                                                      color: Colors
-                                                                          .black),
-                                                                ))
-                                                          ],
-                                                        );
-                                                      },
-                                                    ) //アラートを表示
-                                                  : _deleteItem(
-                                                      _parts[index]['id']);
-                                            },
-                                          ),
-                                        )
-                                      ],
+                                          )
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                );
-                              }),
+                                  );
+                                }),
+                          ),
                         ),
-                      ),
-                      Expanded(child: Container()),
-
-                      adContainer,
-                    ],
+                        Expanded(child: Container()),
+                        adContainer,
+                      ],
+                    ),
                   ),
-                ),
+              ),
           floatingActionButton: Container(
             margin: const EdgeInsets.only(bottom: 48.0),
             child: FloatingActionButton(

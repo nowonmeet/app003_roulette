@@ -51,14 +51,6 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  Future<void> _updateSelectedLanguageCode(String index) async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _languageCode = index;
-      prefs.setString('languageCode', _languageCode);
-    });
-  }
-
 
 
   @override
