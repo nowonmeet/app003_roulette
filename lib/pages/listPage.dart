@@ -1,6 +1,7 @@
 import 'package:app003_roulette/model/PartsViewModel.dart';
 import 'package:app003_roulette/model/RouletteViewModel.dart';
 import 'package:app003_roulette/model/applocalizations.dart';
+import 'package:app003_roulette/pages/addEditPage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
@@ -109,6 +110,30 @@ class _ListPageState extends State<ListPage>
     });
   }
 
+  void pushWithReloadByReturnAddEditPage(BuildContext context,index) async {//追加・編集画面に遷移する
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute<bool>(
+        builder: (BuildContext context) => AddEditPage(rouletteId: _roulettes[index]['id']),
+      ),
+    );
+    if (result == null) {
+      //帰ってきた時にresultがtrueになる
+    } else {
+      if (result) {
+        setState(() {
+          _isLoading = true;
+          _refreshJournals();
+          _getRouletteAll();
+//          _getTitle(_rouletteId);
+//          _reloadRoulette();
+        });
+      }
+    }
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
     var _screenSize = MediaQuery.of(context).size;
@@ -126,7 +151,7 @@ class _ListPageState extends State<ListPage>
     );
 
 
-    Future<void> _addItem() async {
+    Future<void> _addItem() async { //ルーレット追加
       _isLoading = true;
       await RouletteViewModel.createItem(appLocalizations.getTranslatedValue(_languageCode,'newRoulette'));
 //      await RouletteViewModel.createItem('name',DateTime.now());
@@ -137,7 +162,7 @@ class _ListPageState extends State<ListPage>
       await _getRouletteAll();
     }
 
-    Future<void> _deleteItem(int id) async {
+    Future<void> _deleteItem(int id) async { //ルーレット削除
       _isLoading = true;
       await RouletteViewModel.deleteItem(id);
       await PartsViewModel.deleteRouletteItem(id);
@@ -179,7 +204,7 @@ class _ListPageState extends State<ListPage>
         context: context,
         barrierDismissible: false,
         builder: (context) {
-          return AlertDialog(
+          return AlertDialog( // ダイアログの設定
             title: Text(appLocalizations.getTranslatedValue(_languageCode,'check')),
             content: Text(appLocalizations.getTranslatedValue(_languageCode,'deleteConfirmationMessage') + _roulettes[index]['name']),
             actions: <Widget>[
@@ -231,8 +256,10 @@ class _ListPageState extends State<ListPage>
                               crossAxisCount: 2,
                               children: List.generate(
                                   _roulettes.length,
-                                  (index) => Card(
+                                  (index) => Card(//ルーレットの枠
                                         shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
                                           side: BorderSide(
                                             color: _selectedRoulette(index),
                                           ),
@@ -261,8 +288,12 @@ class _ListPageState extends State<ListPage>
                                               ),
                                               Column(
                                                 children: <Widget>[
-                                                  Text(_roulettes[index]
-                                                      ['name']),
+
+                                                  Padding(
+                                                    padding: const EdgeInsets.only(top: 8.0),
+                                                    child: Text(_roulettes[index]
+                                                        ['name']),
+                                                  ),
                                                   Expanded(
                                                     child:
                                                         FractionallySizedBox(
@@ -325,9 +356,9 @@ class _ListPageState extends State<ListPage>
                                                       ),
                                                     ),
                                                   ),
-                                                  Row(
+                                                  Row(//編集、削除ボタン
                                                     children: [
-                                                      IconButton(
+                                                      IconButton(//削除ボタン
                                                           onPressed: () {
                                                             if (_roulettes
                                                                     .length <=
@@ -339,7 +370,14 @@ class _ListPageState extends State<ListPage>
                                                             }
                                                           },
                                                           icon: const Icon(
-                                                              Icons.delete))
+                                                              Icons.delete)),
+                                                      const Expanded(child: SizedBox()),
+                                                      IconButton( //編集ボタン
+                                                          onPressed: () {
+                                                            pushWithReloadByReturnAddEditPage(context,index);
+                                                          },
+                                                          icon: const Icon(
+                                                              Icons.edit)),
                                                     ],
                                                   ),
                                                 ],

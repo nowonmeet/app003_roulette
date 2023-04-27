@@ -219,7 +219,7 @@ class _RoulettePageState extends State<RoulettePage>
     }
   }
 
-  void pushWithReloadByReturnAddEditPage(BuildContext context) async {
+  void pushWithReloadByReturnAddEditPage(BuildContext context) async {//追加・編集画面に遷移する
     final result = await Navigator.push(
       context,
       MaterialPageRoute<bool>(
@@ -366,7 +366,7 @@ class _RoulettePageState extends State<RoulettePage>
                             _rouletteResult = '';
                             pushWithReloadByReturnListPage(context);
                           },
-                          icon: const Icon(Icons.list),
+                          icon: Image.asset('lib/assets/menu_icon.png'),
                           iconSize: 48,
                         ),
                         IconButton(

@@ -102,14 +102,21 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
                 crossAxisCount: 4,
                 children: List.generate(
                     _colorSelectList.length,
-                    (index) => Card(
+                    (index) => Card(//色選択ボタン
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                           child: Center(
                             child: Stack(
                               children: [
-                                Container(
-                                  color: _colorSelectList[index],
+                                Container(//色選択ボタン
+                                  //角丸にする
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    color: _colorSelectList[index],
+                                  ),
                                 ),
-                                Center(
+                                Center(//色選択ボタンの上にチェックマーク
                                     child: Opacity(
 //                            opacity:0.5,
                                   opacity: _usedColorChack(index),
@@ -118,7 +125,7 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
                                     size: 48,
                                   ),
                                 )),
-                                FractionallySizedBox(
+                                FractionallySizedBox(//色選択ボタンの上に透明ボタン
                                   widthFactor: 1.0,
                                   heightFactor: 1.0,
                                   child: ElevatedButton(
@@ -131,7 +138,7 @@ class _ColorSelectPageState extends State<ColorSelectPage> {
 
                                       Navigator.pop(context, true);
                                     },
-                                    style: ElevatedButton.styleFrom(
+                                    style: ElevatedButton.styleFrom(//透明ボタンのスタイル
                                         foregroundColor: Colors.black45,
                                         backgroundColor: Colors.transparent,
                                         elevation: 0),
