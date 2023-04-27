@@ -46,230 +46,20 @@ class _RoulettePageState extends State<RoulettePage>
   var _resultNumber = 0; //結果選択用
   var _rouletteResult = ''; //結果表示用
   var _languageCode = 'en'; //言語設定用
-
   var appLocalizations = AppLocalizations();
-
-  //広告用
-  // バナー広告をインスタンス化
-  final BannerAd myBanner = BannerAd(
-    adUnitId: AdIdManagement.rouletteBannerAdUnitId,
-    size: AdSize.banner,
-    request: const AdRequest(),
-    listener: const BannerAdListener(),
-  );
-
-  _getRouletteId() async {//保存しているルーレットIDを取得
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _rouletteId = prefs.getInt('rouletteId') ?? 1;
-    });
-  }
-
-  // Shared PreferenceにIDを書き込む
-  void _setRouletteId() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    // 以下の「counter」がキー名。
-    await prefs.setInt('rouletteId', _rouletteId);
-  }
-
-  Future<void> _getTitle(rouletteId) async {
-    //SQLからタイトルを取得
-    final data = await RouletteViewModel.getItem(rouletteId);
-    if (data.isNotEmpty) {
-      setState(() {
-        _rouletteTitle = data[0]['name'];
-        _titleIsLoading = false;
-      });
-    }
-  }
-
-  _getLanguage() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _languageCode = prefs.getString('languageCode') ?? 'en';
-    });
-  }
-  
-  Future<void> _refreshJournals() async {
-    //データベースの一覧をパーツに登録。画面更新用
-    //ルーレットグループの設定も行う。
-    final data = await PartsViewModel.getNotes(_rouletteId);
-    setState(() {
-      _parts = data;
-      _isLoading = false;
-      _group = RouletteGroup([
-        for (var i = 0; i < _parts.length; i++)
-          RouletteUnit.text(_parts[i]['name'],
-              color: _colorSelectList[_parts[i]['color']],
-              weight: _parts[i]['ratio'] / 10, //見た目の比率
-              textStyle: const TextStyle(
-                fontSize: 14,
-                shadows: <Shadow>[
-                  Shadow(
-                    color: Colors.black,
-                    offset: Offset(1.0, 1.0),
-                    blurRadius: 3.0,
-                  ),
-                ],
-              )),
-      ]);
-    });
-  }
-
-  //ルーレット更新用
-  Future<void> _reloadRoulette() async {
-    await _refreshJournals();
-    _controller = RouletteController(
-      group: _group,
-      vsync: this,
-    );
-    _ratioList = [];
-    for (var i = 0; i < _parts.length; i++) {
-      _ratioList.add(_parts[i]['ratio']);
-    }
-  }
-
-  //カウンターを設定する。
-
-
-  //初回設定処理
-  Future<void> _firstStartup() async {
-    await _getFirstStartup();
-    if (_firstStart) {
-      //初回の設定処理
-      await _addItemFirstStartup();
-    }
-    _firstStart = false;
-    _setFirstStartup();
-  }
-
-  Future<void> _setFirstStartup() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    // 以下の「counter」がキー名。
-    await prefs.setBool('firstStart', _firstStart);//初回起動かどうかを登録する。
-  }
-
-  Future<void> _getFirstStartup() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _firstStart = prefs.getBool('firstStart') ?? true;
-    });
-  }
-
-  Future<void> _addItemFirstStartup() async {//初回起動のみ自動でルーレットを作成する
-    await RouletteViewModel.createItem(appLocalizations.getTranslatedValue(widget.languageCode,'dice'));
-    await PartsViewModel.createItem(1, '１', 0, 1);
-    await PartsViewModel.createItem(1, '２', 1, 1);
-    await PartsViewModel.createItem(1, '３', 2, 1);
-    await PartsViewModel.createItem(1, '４', 3, 1);
-    await PartsViewModel.createItem(1, '５', 4, 1);
-    await PartsViewModel.createItem(1, '６', 5, 1);
-  }
-
-  void _resultDisplay() {
-    setState(() {
-      _rouletteResult = _parts[_resultNumber]['name'].toString();
-    });
-  }
-
-  void _displayReset() {
-    setState(() {
-      _rouletteResult = '';
-    });
-  }
-
-  int randomIntWithRange(int min, int max) {
-    //min〜maxの間の数字のランダム
-    int value = math.Random().nextInt(max - min);
-    return value + min;
-  }
-
-  //渡された重み付け配列からIndexを得る テーブルは順番関係なし。
-  getRandomIndex(List<int> inputTable) {
-    List<int> weightTable = inputTable;
-    int totalWeight = weightTable.reduce((a, b) => a + b);
-    int value = randomIntWithRange(1, totalWeight + 1);
-
-    int retIndex = -1;
-    for (var i = 0; i < weightTable.length; ++i) {
-      if (weightTable[i] >= value) {
-        retIndex = i;
-        break;
-      }
-      value -= weightTable[i];
-    }
-    return retIndex;
-  }
-
-  _privacyPolicyURL() async {
-
-    String _privacyPolicyURLString = 'https://fir-memo-90c4e.web.app/';
-    //言語に応じてURLを変更する。
-    if(_languageCode == 'ja') {
-      _privacyPolicyURLString = 'https://fir-memo-90c4e.web.app/';
-    } else {
-      _privacyPolicyURLString = 'https://service-agreement-now-on-meet.web.app/';
-    }
-
-    //プライバシーポリシーに遷移
-    if (await canLaunchUrlString(_privacyPolicyURLString)) {
-      await launchUrlString(_privacyPolicyURLString);
-    } else {
-      throw 'Could not Launch $_privacyPolicyURLString';
-    }
-  }
-
-  void pushWithReloadByReturnAddEditPage(BuildContext context) async {//追加・編集画面に遷移する
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute<bool>(
-        builder: (BuildContext context) => AddEditPage(rouletteId: _rouletteId),
-      ),
-    );
-    if (result == null) {
-      //帰ってきた時にresultがtrueになる
-    } else {
-      if (result) {
-        setState(() {
-          _getTitle(_rouletteId);
-          _reloadRoulette();
-        });
-      }
-    }
-  }
-
-  void pushWithReloadByReturnListPage(BuildContext context) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute<int>(
-        builder: (BuildContext context) => ListPage(rouletteId: _rouletteId),
-      ),
-    );
-
-    if (result == null) {
-      //帰ってきた時にresultにルーレットIDが入る
-    } else {
-      _rouletteId = result;
-    }
-    setState(() {
-      _setRouletteId();
-      _getTitle(_rouletteId);
-      _reloadRoulette();
-    });
-  }
 
   @override
   void initState() {
     //画面構築時
     Future(() async {
-      await _firstStartup();
-      await _getRouletteId();
-      await _getTitle(_rouletteId);
-      await _reloadRoulette();
-      await _getLanguage();
+      await _firstStartup();  //初回起動時の処理
+      await _getRouletteId(); //ルーレットIDを取得
+      await _getTitle(_rouletteId); //ルーレットタイトルを取得
+      await _reloadRoulette();  //ルーレットを再読み込み
+      await _getLanguage(); //言語設定を取得
     });
     super.initState();
-    _rouletteResult = '';
+    _rouletteResult = ''; //結果表示用
 
   }
 
@@ -467,6 +257,216 @@ class _RoulettePageState extends State<RoulettePage>
       ),
     );
   }
+
+
+
+  //広告用
+  // バナー広告をインスタンス化
+  final BannerAd myBanner = BannerAd(
+    adUnitId: AdIdManagement.rouletteBannerAdUnitId,
+    size: AdSize.banner,
+    request: const AdRequest(),
+    listener: const BannerAdListener(),
+  );
+
+  _getRouletteId() async {//保存しているルーレットIDを取得
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _rouletteId = prefs.getInt('rouletteId') ?? 1;
+    });
+  }
+
+  // Shared PreferenceにIDを書き込む
+  void _setRouletteId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // 以下の「counter」がキー名。
+    await prefs.setInt('rouletteId', _rouletteId);
+  }
+
+  Future<void> _getTitle(rouletteId) async {
+    //SQLからタイトルを取得
+    final data = await RouletteViewModel.getItem(rouletteId);
+    if (data.isNotEmpty) {
+      setState(() {
+        _rouletteTitle = data[0]['name'];
+        _titleIsLoading = false;
+      });
+    }
+  }
+
+  _getLanguage() async {  //言語設定を取得
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _languageCode = prefs.getString('languageCode') ?? 'en';
+    });
+  }
+
+  Future<void> _refreshJournals() async {
+    //データベースの一覧をパーツに登録。画面更新用
+    //ルーレットグループの設定も行う。
+    final data = await PartsViewModel.getNotes(_rouletteId);
+    setState(() {
+      _parts = data;
+      _isLoading = false;
+      _group = RouletteGroup([
+        for (var i = 0; i < _parts.length; i++)
+          RouletteUnit.text(_parts[i]['name'],
+              color: _colorSelectList[_parts[i]['color']],
+              weight: _parts[i]['ratio'] / 10, //見た目の比率
+              textStyle: const TextStyle(
+                fontSize: 14,
+                shadows: <Shadow>[
+                  Shadow(
+                    color: Colors.black,
+                    offset: Offset(1.0, 1.0),
+                    blurRadius: 3.0,
+                  ),
+                ],
+              )),
+      ]);
+    });
+  }
+
+  //ルーレット更新用
+  Future<void> _reloadRoulette() async {
+    await _refreshJournals();
+    _controller = RouletteController(
+      group: _group,
+      vsync: this,
+    );
+    _ratioList = [];
+    for (var i = 0; i < _parts.length; i++) {
+      _ratioList.add(_parts[i]['ratio']);
+    }
+  }
+
+  //初回設定処理
+  Future<void> _firstStartup() async {
+    await _getFirstStartup();
+    if (_firstStart) {
+      //初回の設定処理
+      await _addItemFirstStartup();
+    }
+    _firstStart = false;
+    _setFirstStartup();
+  }
+
+  Future<void> _setFirstStartup() async  {  //初回起動かどうかを登録する。
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // 以下の「counter」がキー名。
+    await prefs.setBool('firstStart', _firstStart);//初回起動かどうかを登録する。
+  }
+
+  Future<void> _getFirstStartup() async { //初回起動かどうかを取得する。
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _firstStart = prefs.getBool('firstStart') ?? true;
+    });
+  }
+
+  Future<void> _addItemFirstStartup() async {//初回起動のみ自動でルーレットを作成する
+    await RouletteViewModel.createItem(appLocalizations.getTranslatedValue(widget.languageCode,'dice'));
+    await PartsViewModel.createItem(1, '１', 0, 1);
+    await PartsViewModel.createItem(1, '２', 1, 1);
+    await PartsViewModel.createItem(1, '３', 2, 1);
+    await PartsViewModel.createItem(1, '４', 3, 1);
+    await PartsViewModel.createItem(1, '５', 4, 1);
+    await PartsViewModel.createItem(1, '６', 5, 1);
+  }
+
+  void _resultDisplay() { //結果表示
+    setState(() {
+      _rouletteResult = _parts[_resultNumber]['name'].toString();
+    });
+  }
+
+  void _displayReset() {  //結果表示をリセット
+    setState(() {
+      _rouletteResult = '';
+    });
+  }
+
+  int randomIntWithRange(int min, int max) {
+    //min〜maxの間の数字のランダム
+    int value = math.Random().nextInt(max - min);
+    return value + min;
+  }
+
+  //渡された重み付け配列からIndexを得る テーブルは順番関係なし。
+  getRandomIndex(List<int> inputTable) {
+    List<int> weightTable = inputTable;
+    int totalWeight = weightTable.reduce((a, b) => a + b);
+    int value = randomIntWithRange(1, totalWeight + 1);
+
+    int retIndex = -1;
+    for (var i = 0; i < weightTable.length; ++i) {
+      if (weightTable[i] >= value) {
+        retIndex = i;
+        break;
+      }
+      value -= weightTable[i];
+    }
+    return retIndex;
+  }
+
+  _privacyPolicyURL() async { //プライバシーポリシーに遷移
+
+    String _privacyPolicyURLString = 'https://fir-memo-90c4e.web.app/';
+    //言語に応じてURLを変更する。
+    if(_languageCode == 'ja') {
+      _privacyPolicyURLString = 'https://fir-memo-90c4e.web.app/';
+    } else {
+      _privacyPolicyURLString = 'https://service-agreement-now-on-meet.web.app/';
+    }
+
+    //プライバシーポリシーに遷移
+    if (await canLaunchUrlString(_privacyPolicyURLString)) {  //URLを開けるかどうかチェック
+      await launchUrlString(_privacyPolicyURLString);
+    } else {
+      throw 'Could not Launch $_privacyPolicyURLString';
+    }
+  }
+
+  void pushWithReloadByReturnAddEditPage(BuildContext context) async {//追加・編集画面に遷移する
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute<bool>(
+        builder: (BuildContext context) => AddEditPage(rouletteId: _rouletteId),
+      ),
+    );
+    if (result == null) {
+      //帰ってきた時にresultがtrueになる
+    } else {
+      if (result) {
+        setState(() {
+          _getTitle(_rouletteId);
+          _reloadRoulette();
+        });
+      }
+    }
+  }
+
+  void pushWithReloadByReturnListPage(BuildContext context) async { //リスト画面に遷移する
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute<int>(
+        builder: (BuildContext context) => ListPage(rouletteId: _rouletteId),
+      ),
+    );
+
+    if (result == null) {
+      //帰ってきた時にresultにルーレットIDが入る
+    } else {
+      _rouletteId = result;
+    }
+    setState(() {
+      _setRouletteId();
+      _getTitle(_rouletteId);
+      _reloadRoulette();
+    });
+  }
+
+
 
   @override
   void dispose() {

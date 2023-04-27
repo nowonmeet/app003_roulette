@@ -23,109 +23,33 @@ class AddEditPage extends StatefulWidget {
 class _AddEditPageState extends State<AddEditPage>
     with SingleTickerProviderStateMixin //アニメーションが一つだけの場合
 {
-  //広告用
-  // バナー広告をインスタンス化
-  final BannerAd myBanner = BannerAd(
-    adUnitId: AdIdManagement.addEditBannerAdUnitId,
-    size: AdSize.banner,
-    request: const AdRequest(),
-    listener: const BannerAdListener(),
-  );
 
   var appLocalizations = AppLocalizations(); //多言語対応用
   var _languageCode = 'en'; //言語設定用
+  late List<TextEditingController> itemNameController;//テキストコントローラー
+  late List<TextEditingController> ratioController;//テキストコントローラー
+  late TextEditingController titleController;//テキストコントローラー
+  List<int> _usedColorsList = []; //使っているカラーを調べるためのリスト
 
-  _getLanguage() async {
-    //言語設定を取得
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _languageCode = prefs.getString('languageCode') ?? 'ja';
-    });
-  }
-
-  late List<TextEditingController> itemNameController;
-  late List<TextEditingController> ratioController;
-  late TextEditingController titleController;
 
   List<Map<String, dynamic>> _parts = [];
   bool _isLoading = true; //画面更新グルグルに使う判定値
   bool _isDisabled = false; //連打防止のための判定値
-  late String rouletteTitle;
+  late String rouletteTitle;  //ルーレットのタイトル
   final ScrollController _scrollController = ScrollController(); //スクロール用
-
-  Future<void> _refreshJournals() async {
-    //データベースの一覧をパーツに登録。画面更新用
-    final data = await PartsViewModel.getNotes(widget.rouletteId ?? 0);
-    setState(() {
-      _parts = data;
-    });
-  }
-
-  Future<void> _getTitle() async {
-    //タイトルを取得
-    final data = await RouletteViewModel.getItem(widget.rouletteId ?? 0);
-    setState(() {
-      rouletteTitle = data[0]['name'];
-//      _titleIsLoading = false;
-    });
-  }
-
-  List<int> _usedColorsList = [];
-
-  _addUsedColors() {
-    //使っているカラーを調べるためのリストを作成
-    _usedColorsList = [];
-    for (var i = 0; i < _parts.length; i++) {
-      _usedColorsList.add(_parts[i]['color']);
-    }
-  }
-
-  _initTextController() {
-    //テキストコントローラーの初期化
-    itemNameController =
-        List.generate(_parts.length, (index) => TextEditingController());
-
-    ratioController =
-        List.generate(_parts.length, (index) => TextEditingController());
-    titleController = TextEditingController();
-    titleController.text = rouletteTitle;
-  }
-
-  _setTextController() {
-    //テキストコントローラーに値をセット
-    for (var i = 0; i < _parts.length; i++) {
-      itemNameController[i].text = _parts[i]['name'];
-      ratioController[i].text = _parts[i]['ratio'].toString();
-    }
-  }
-
-  _notUsedColorsCheck() {
-    //使っていないカラーを調べる
-    for (var i = 0; i < _colorSelectList.length; i++) {
-      if (_usedColorsList.contains(i)) {
-      } else {
-        return i;
-      }
-    }
-    //全部のカラーを使っていたらランダムでカラーを選択
-    return math.Random().nextInt(_colorSelectList.length);
-  }
-
   final _colorSelectList = ColorList().colorSelectList; //カラーリスト
 
   //言語設定に応じてmaxLengthの値を変える処理
-  var titleMaxLength = 24;
-  var itemNameMaxLength = 16;
+  var titleMaxLength = 24;  //タイトルの最大文字数
+  var itemNameMaxLength = 16; //アイテム名の最大文字数
+  final focusNode = FocusNode();
+  var paddingBottom = 60.0;
 
-  void _getMaxLength() {
-    if (_languageCode == 'ja') {
-      titleMaxLength = 12;
-      itemNameMaxLength = 8;
-    } else {
-      titleMaxLength = 24;
-      itemNameMaxLength = 16;
-    }
-  }
+  var bottomSpace = 0.0;
+
+  final _focusNode = FocusNode(); //フォーカス用
+
+
 
   @override
   void initState() {
@@ -144,69 +68,6 @@ class _AddEditPageState extends State<AddEditPage>
       _isLoading = false;
     });
   }
-
-  Future<void> _addItem() async {
-    await PartsViewModel.createItem(
-        widget.rouletteId ?? 0, '', _notUsedColorsCheck(), 1);
-    await _refreshJournals();
-    await _addUsedColors();
-    await _initTextController();
-    await _setTextController();
-    _isLoading = false;
-  }
-
-  Future<void> _updateItem(int id, String name, int ratio) async {
-    await PartsViewModel.updateItem(id, name, ratio);
-    await _refreshJournals();
-    _addUsedColors();
-    _isLoading = false;
-  }
-
-  Future<void> _deleteItem(int id) async {
-    await PartsViewModel.deleteItem(id);
-    await _refreshJournals();
-    await _addUsedColors();
-    await _initTextController();
-    await _setTextController();
-    _isLoading = false;
-  }
-
-  Future<void> _updateTitle(rouletteTitle) async {
-//      _titleIsLoading = true;
-    await RouletteViewModel.updateItem(widget.rouletteId ?? 0, rouletteTitle);
-    _getTitle();
-  }
-
-  //帰ってきた時の処理
-
-  void pushWithReloadByReturn(BuildContext context, index) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute<bool>(
-        builder: (BuildContext context) =>
-            ColorSelectPage(editColorId: index, rouletteId: widget.rouletteId),
-      ),
-    );
-    if (result == null) {
-      //帰ってきた時にresultがtrueになる
-    } else {
-      if (result) {
-        setState(() {
-          Future(() async {
-            await _refreshJournals();
-            _addUsedColors();
-          });
-        });
-      }
-    }
-  }
-
-  final focusNode = FocusNode();
-  var paddingBottom = 60.0;
-
-  var bottomSpace = 0.0;
-
-  final _focusNode = FocusNode(); //フォーカス用
 
   @override
   Widget build(BuildContext context) {
@@ -613,14 +474,18 @@ class _AddEditPageState extends State<AddEditPage>
                       setState(() => _isDisabled = true); //ボタンを無効
                       await _addItem();
                       await Future.delayed(
-                        const Duration(milliseconds: 500), //無効にする時間
+                        const Duration(milliseconds: 200), //無効にする時間
                       );
-
-                      _scrollController.animateTo(
+                      _scrollController.animateTo(//スクロール
                         _scrollController.position.maxScrollExtent,
                         duration: const Duration(milliseconds: 500),
                         curve: Curves.linear,
                       );
+
+                      await Future.delayed(
+                        const Duration(milliseconds: 500), //無効にする時間
+                      );
+
 
                       setState(() => _isDisabled = false); //ボタンを有効
                     },
@@ -631,4 +496,150 @@ class _AddEditPageState extends State<AddEditPage>
       ),
     );
   }
+
+  //広告用
+  // バナー広告をインスタンス化
+  final BannerAd myBanner = BannerAd(
+    adUnitId: AdIdManagement.addEditBannerAdUnitId,
+    size: AdSize.banner,
+    request: const AdRequest(),
+    listener: const BannerAdListener(),
+  );
+
+  _getLanguage() async {
+    //言語設定を取得
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _languageCode = prefs.getString('languageCode') ?? 'ja';
+    });
+  }
+
+
+
+  Future<void> _refreshJournals() async {
+    //データベースの一覧をパーツに登録。画面更新用
+    final data = await PartsViewModel.getNotes(widget.rouletteId ?? 0);
+    setState(() {
+      _parts = data;
+    });
+  }
+
+  Future<void> _getTitle() async {
+    //タイトルを取得
+    final data = await RouletteViewModel.getItem(widget.rouletteId ?? 0);
+    setState(() {
+      rouletteTitle = data[0]['name'];
+//      _titleIsLoading = false;
+    });
+  }
+
+
+  _addUsedColors() {
+    //使っているカラーを調べるためのリストを作成
+    _usedColorsList = [];
+    for (var i = 0; i < _parts.length; i++) {
+      _usedColorsList.add(_parts[i]['color']);
+    }
+  }
+
+  _initTextController() {
+    //テキストコントローラーの初期化
+    itemNameController =
+        List.generate(_parts.length, (index) => TextEditingController());
+
+    ratioController =
+        List.generate(_parts.length, (index) => TextEditingController());
+    titleController = TextEditingController();
+    titleController.text = rouletteTitle;
+  }
+
+  _setTextController() {
+    //テキストコントローラーに値をセット
+    for (var i = 0; i < _parts.length; i++) {
+      itemNameController[i].text = _parts[i]['name'];
+      ratioController[i].text = _parts[i]['ratio'].toString();
+    }
+  }
+
+  _notUsedColorsCheck() {
+    //使っていないカラーを調べる
+    for (var i = 0; i < _colorSelectList.length; i++) {
+      if (_usedColorsList.contains(i)) {
+      } else {
+        return i;
+      }
+    }
+    //全部のカラーを使っていたらランダムでカラーを選択
+    return math.Random().nextInt(_colorSelectList.length);
+  }
+
+
+  void _getMaxLength() {  //言語設定に応じてmaxLengthの値を変える処理
+    if (_languageCode == 'ja') {
+      titleMaxLength = 12;
+      itemNameMaxLength = 8;
+    } else {
+      titleMaxLength = 24;
+      itemNameMaxLength = 16;
+    }
+  }
+
+
+  Future<void> _addItem() async { //アイテムを追加
+    await PartsViewModel.createItem(
+        widget.rouletteId ?? 0, '', _notUsedColorsCheck(), 1);
+    await _refreshJournals();
+    await _addUsedColors();
+    await _initTextController();//テキストコントローラーの初期化
+    await _setTextController();//テキストコントローラーに値をセット
+    _isLoading = false;
+  }
+
+  Future<void> _updateItem(int id, String name, int ratio) async {  //アイテムを更新
+    await PartsViewModel.updateItem(id, name, ratio);
+    await _refreshJournals();
+    _addUsedColors();
+    _isLoading = false;
+  }
+
+  Future<void> _deleteItem(int id) async {  //アイテムを削除
+    await PartsViewModel.deleteItem(id);
+    await _refreshJournals();
+    await _addUsedColors();
+    await _initTextController();
+    await _setTextController();
+    _isLoading = false;
+  }
+
+  Future<void> _updateTitle(rouletteTitle) async {  //タイトルを更新
+    await RouletteViewModel.updateItem(widget.rouletteId ?? 0, rouletteTitle);
+    _getTitle();
+  }
+
+  //帰ってきた時の処理
+
+  void pushWithReloadByReturn(BuildContext context, index) async {  //アイテム追加画面に遷移
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute<bool>(
+        builder: (BuildContext context) =>
+            ColorSelectPage(editColorId: index, rouletteId: widget.rouletteId),
+      ),
+    );
+    if (result == null) {
+      //帰ってきた時にresultがtrueになる
+    } else {
+      if (result) {
+        setState(() {
+          Future(() async {
+            await _refreshJournals();
+            _addUsedColors();
+          });
+        });
+      }
+    }
+  }
+
+
+
 }

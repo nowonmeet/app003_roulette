@@ -23,81 +23,16 @@ class _ListPageState extends State<ListPage>
     with TickerProviderStateMixin //アニメーションが２つ以上
 {
 
-  //広告用
-  // バナー広告をインスタンス化
-  final BannerAd myBanner = BannerAd(
-    adUnitId: AdIdManagement.listBannerAdUnitId,
-    size: AdSize.banner,
-    request: const AdRequest(),
-    listener: const BannerAdListener(),
-  );
-
   var appLocalizations = AppLocalizations();//多言語対応用
   var _languageCode = 'en'; //言語設定用
-
-  _getLanguage() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _languageCode = prefs.getString('languageCode') ?? 'ja';
-    });
-  }
-
-
-  final _colorSelectList= ColorList().colorSelectList;
-
-
-
-  _getCheckRouletteId() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _checkRouletteId = prefs.getInt('rouletteId') ?? 1;
-    });
-  }
-
-  // Shared Preferenceにデータを書き込む
-  _setRouletteId() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    // 以下の「counter」がキー名。
-    await prefs.setInt('rouletteId', _roulettes[0]['id']);
-  }
-
-
+  final _colorSelectList= ColorList().colorSelectList;//色一覧
   final int _rouletteId = 0;
   int _checkRouletteId = 0;
-
-  List<Map<String, dynamic>> _roulettes = [];
-  List<List<Map<String, dynamic>>> _roulettesAll = [];
-
+  List<Map<String, dynamic>> _roulettes = []; //ルーレットのデータ
+  List<List<Map<String, dynamic>>> _roulettesAll = [];  //ルーレットの全データ
   bool _isLoading = true; //画面更新グルグルに使う判定値
   bool _isDisabled = false; //ボタン連打防止用
 
-  Future<void> _refreshJournals() async {
-    //データベースの一覧をルーレットに登録。画面更新用
-    final data = await RouletteViewModel.getNotes();
-    setState(() {
-      _roulettes = data;
-    });
-  }
-
-  Future<void> _getRouletteAll() async {
-    _roulettesAll = [];
-    for (var i = 0; i < _roulettes.length; i++) {
-      final data = await PartsViewModel.getNotes(_roulettes[i]['id']);
-      _roulettesAll.add(data);
-    }
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-
-  _selectedRoulette(index) {
-    if (_roulettes[index]['id'] == _rouletteId) {
-      return Colors.black38;
-    } else {
-      return Colors.white;
-    }
-  }
 
   @override
   void initState() {
@@ -110,27 +45,6 @@ class _ListPageState extends State<ListPage>
     });
   }
 
-  void pushWithReloadByReturnAddEditPage(BuildContext context,index) async {//追加・編集画面に遷移する
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute<bool>(
-        builder: (BuildContext context) => AddEditPage(rouletteId: _roulettes[index]['id']),
-      ),
-    );
-    if (result == null) {
-      //帰ってきた時にresultがtrueになる
-    } else {
-      if (result) {
-        setState(() {
-          _isLoading = true;
-          _refreshJournals();
-          _getRouletteAll();
-//          _getTitle(_rouletteId);
-//          _reloadRoulette();
-        });
-      }
-    }
-  }
 
 
 
@@ -149,85 +63,6 @@ class _ListPageState extends State<ListPage>
       height: myBanner.size.height.toDouble(),
       child: adWidget,
     );
-
-
-    Future<void> _addItem() async { //ルーレット追加
-      _isLoading = true;
-      await RouletteViewModel.createItem(appLocalizations.getTranslatedValue(_languageCode,'newRoulette'));
-//      await RouletteViewModel.createItem('name',DateTime.now());
-      final date = await RouletteViewModel.getLatestItem();
-      await PartsViewModel.createItem(date[0]['id'], '', 0, 1);
-      await PartsViewModel.createItem(date[0]['id'], '', 1, 1);
-      await _refreshJournals();
-      await _getRouletteAll();
-    }
-
-    Future<void> _deleteItem(int id) async { //ルーレット削除
-      _isLoading = true;
-      await RouletteViewModel.deleteItem(id);
-      await PartsViewModel.deleteRouletteItem(id);
-      // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      //   content: Text('Successfully deleted a journal!'),
-      // ));
-      await _refreshJournals();
-      await _getRouletteAll();
-      if(_checkRouletteId == id){
-        _setRouletteId();
-      }
-    }
-
-    _deleteAlertLast() {
-      //最後の一個を削除時のアラート
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return AlertDialog(
-            title: Text(appLocalizations.getTranslatedValue(_languageCode,'attention')),
-            content: Text(appLocalizations.getTranslatedValue(_languageCode,'rouletteAttention')),
-            actions: [
-              TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text(
-                    'OK',
-                    style: TextStyle(color: Colors.black),
-                  ))
-            ],
-          );
-        },
-      );
-    }
-
-    _deleteAlert(index) {
-      //削除してもいいですか？はい/いいえ
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return AlertDialog( // ダイアログの設定
-            title: Text(appLocalizations.getTranslatedValue(_languageCode,'check')),
-            content: Text(appLocalizations.getTranslatedValue(_languageCode,'deleteConfirmationMessage') + _roulettes[index]['name']),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('Cancel',
-                  style: TextStyle(color: Colors.black),
-                ),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-              TextButton(
-                child: const Text('OK',
-                  style: TextStyle(color: Colors.black),
-                ),
-                onPressed: () {
-                  _deleteItem(_roulettes[index]['id']);
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
-    }
 
     return WillPopScope(
       //端末のバックボタンを無効にする
@@ -406,7 +241,7 @@ class _ListPageState extends State<ListPage>
                     await _addItem();
 
                     await Future.delayed(
-                      const Duration(milliseconds: 500), //無効にする時間
+                      const Duration(milliseconds: 1000), //無効にする時間
                     );
 
                     setState(() => _isDisabled = false); //ボタンを有効
@@ -417,4 +252,169 @@ class _ListPageState extends State<ListPage>
       ),
     );
   }
+
+  _deleteAlertLast() {
+    //最後の一個を削除時のアラート
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(appLocalizations.getTranslatedValue(_languageCode,'attention')),
+          content: Text(appLocalizations.getTranslatedValue(_languageCode,'rouletteAttention')),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'OK',
+                  style: TextStyle(color: Colors.black),
+                ))
+          ],
+        );
+      },
+    );
+  }
+
+  _deleteAlert(index) {
+    //削除してもいいですか？はい/いいえ
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog( // ダイアログの設定
+          title: Text(appLocalizations.getTranslatedValue(_languageCode,'check')),
+          content: Text(appLocalizations.getTranslatedValue(_languageCode,'deleteConfirmationMessage') + _roulettes[index]['name']),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel',
+                style: TextStyle(color: Colors.black),
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text('OK',
+                style: TextStyle(color: Colors.black),
+              ),
+              onPressed: () {
+                _deleteItem(_roulettes[index]['id']);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+  //広告用
+  // バナー広告をインスタンス化
+  final BannerAd myBanner = BannerAd(//広告用
+    adUnitId: AdIdManagement.listBannerAdUnitId,
+    size: AdSize.banner,
+    request: const AdRequest(),
+    listener: const BannerAdListener(),
+  );
+
+
+
+  _getLanguage() async {//Shared Preferenceから言語データを取得
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _languageCode = prefs.getString('languageCode') ?? 'ja';
+    });
+  }
+
+
+
+
+
+  _getCheckRouletteId() async {//Shared PreferenceからルーレットIDデータを取得
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _checkRouletteId = prefs.getInt('rouletteId') ?? 1;
+    });
+  }
+
+  // Shared Preferenceにデータを書き込む
+  _setRouletteId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // 以下の「counter」がキー名。
+    await prefs.setInt('rouletteId', _roulettes[0]['id']);
+  }
+
+
+  Future<void> _refreshJournals() async {
+    //データベースの一覧をルーレットに登録。画面更新用
+    final data = await RouletteViewModel.getNotes();
+    setState(() {
+      _roulettes = data;
+    });
+  }
+
+  Future<void> _getRouletteAll() async {  //データベースの一覧をルーレットに登録。画面更新用
+    _roulettesAll = [];
+    for (var i = 0; i < _roulettes.length; i++) {
+      final data = await PartsViewModel.getNotes(_roulettes[i]['id']);
+      _roulettesAll.add(data);
+    }
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+
+  _selectedRoulette(index) {//ルーレットを選択した時の処理
+    if (_roulettes[index]['id'] == _rouletteId) {
+      return Colors.black38;
+    } else {
+      return Colors.white;
+    }
+  }
+
+
+  void pushWithReloadByReturnAddEditPage(BuildContext context,index) async {//追加・編集画面に遷移する
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute<bool>(
+        builder: (BuildContext context) => AddEditPage(rouletteId: _roulettes[index]['id']),
+      ),
+    );
+    if (result == null) {
+      //帰ってきた時にresultがtrueになる
+    } else {
+      if (result) {
+        setState(() {
+          _isLoading = true;
+          _refreshJournals();
+          _getRouletteAll();
+        });
+      }
+    }
+  }
+
+  Future<void> _addItem() async { //ルーレット追加
+    _isLoading = true;
+    await RouletteViewModel.createItem(appLocalizations.getTranslatedValue(_languageCode,'newRoulette'));
+//      await RouletteViewModel.createItem('name',DateTime.now());
+    final date = await RouletteViewModel.getLatestItem();
+    await PartsViewModel.createItem(date[0]['id'], '', 0, 1);
+    await PartsViewModel.createItem(date[0]['id'], '', 1, 1);
+    await _refreshJournals();
+    await _getRouletteAll();
+  }
+
+  Future<void> _deleteItem(int id) async { //ルーレット削除
+    _isLoading = true;
+    await RouletteViewModel.deleteItem(id);
+    await PartsViewModel.deleteRouletteItem(id);
+    await _refreshJournals();
+    await _getRouletteAll();
+    if(_checkRouletteId == id){
+      _setRouletteId();
+    }
+  }
+
+
+
 }
