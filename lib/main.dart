@@ -26,7 +26,8 @@ class MyApp extends StatefulWidget {
 
 
 class _MyAppState extends State<MyApp> {
-  bool _isFirstTime = true;
+  bool _isFirstTime = false;
+//    late bool _isFirstTime;
   var _languageCode = 'en'; //言語設定用
 
   var appLocalizations = AppLocalizations();//多言語対応用

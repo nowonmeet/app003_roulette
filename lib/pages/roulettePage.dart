@@ -36,7 +36,9 @@ class _RoulettePageState extends State<RoulettePage>
   bool _isLoading = true; //画面更新グルグルに使う判定値
   bool _titleIsLoading = true;
   late String _rouletteTitle;
-  bool _firstStart = true; //初回起動の判定値
+  late bool _isFirstTime; //初回起動かどうか
+  late bool _isLanguageSelected;  //言語が選択されているかどうか
+  late bool _isEmptyRoulette; //ルーレットが空かどうか
   List<Map<String, dynamic>> _parts = [];//項目のリスト
   List<int> _ratioList = [];//比率のリスト
   int _rouletteId = 0;
@@ -342,25 +344,43 @@ class _RoulettePageState extends State<RoulettePage>
 
   //初回設定処理
   Future<void> _firstStartup() async {
-    await _getFirstStartup();
-    if (_firstStart) {
-      //初回の設定処理
-      await _addItemFirstStartup();
+    await _getIsLanguageSelected();
+    if(_isLanguageSelected) {//言語が選択されている場合のみ実行
+      //_addItemFirstStartup()が実行されているかどうかを取得する。
+      await _getIsEmptyRoulette();
+      //ルーレット作成ずみかどうか確認する
+      if(_isEmptyRoulette) { //ルーレット作成していない時のみ実行
+        //初回の設定処理
+        await _addItemFirstStartup();
+      }
+
+      // await _getFirstStartup();
+      // if (_isFirstTime) {
+      //   //初回の設定処理
+      //   await _addItemFirstStartup();
+      // }
     }
-    _firstStart = false;
-    _setFirstStartup();
   }
 
-  Future<void> _setFirstStartup() async  {  //初回起動かどうかを登録する。
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    // 以下の「counter」がキー名。
-    await prefs.setBool('firstStart', _firstStart);//初回起動かどうかを登録する。
+  //言語が選択されているかどうかを取得する。
+  Future<void> _getIsLanguageSelected() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isLanguageSelected = prefs.getBool('isLanguageSelected') ?? false;
+    });
   }
 
   Future<void> _getFirstStartup() async { //初回起動かどうかを取得する。
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _firstStart = prefs.getBool('firstStart') ?? true;
+      _isFirstTime = prefs.getBool('isFirstTime') ?? true;
+    });
+  }
+
+  Future<void> _getIsEmptyRoulette() async { //ルーレットが空かどうか判別する。
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isEmptyRoulette = prefs.getBool('isEmptyRoulette') ?? true;
     });
   }
 
@@ -372,7 +392,15 @@ class _RoulettePageState extends State<RoulettePage>
     await PartsViewModel.createItem(1, '４', 3, 1);
     await PartsViewModel.createItem(1, '５', 4, 1);
     await PartsViewModel.createItem(1, '６', 5, 1);
+    _setIsEmptyRoulette();
   }
+
+  // Shared PreferenceにIDを書き込む
+  void _setIsEmptyRoulette() async {  //ルーレット作成したらfalseにする
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isEmptyRoulette', false);
+  }
+
 
   void _resultDisplay() { //結果表示
     setState(() {

@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LanguageSelectionPage extends StatelessWidget {
   const LanguageSelectionPage({super.key});
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,5 +87,6 @@ class LanguageSelectionPage extends StatelessWidget {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('languageCode', languageCode);
     await prefs.setBool('isFirstTime', false);
+    await prefs.setBool('isLanguageSelected', true);
   }
 }
