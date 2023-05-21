@@ -206,13 +206,13 @@ class _ListPageState extends State<ListPage>
                                                           },
                                                           icon: const Icon(
                                                               Icons.delete)),
-                                                      const Expanded(child: SizedBox()),
-                                                      IconButton( //編集ボタン
-                                                          onPressed: () {
-                                                            pushWithReloadByReturnAddEditPage(context,index);
-                                                          },
-                                                          icon: const Icon(
-                                                              Icons.edit)),
+                                                      // const Expanded(child: SizedBox()),
+                                                      // IconButton( //編集ボタン
+                                                      //     onPressed: () {
+                                                      //       pushWithReloadByReturnAddEditPage(context,index);
+                                                      //     },
+                                                      //     icon: const Icon(
+                                                      //         Icons.edit)),
                                                     ],
                                                   ),
                                                 ],

@@ -2,6 +2,7 @@ import 'package:app003_roulette/colorFile.dart';
 import 'package:app003_roulette/model/applocalizations.dart';
 import 'package:app003_roulette/pages/language_selection_page.dart';
 import 'package:app003_roulette/pages/roulettePage.dart';
+import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,6 +11,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main()  {
 
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,//縦固定
+  ]);
   MobileAds.instance.initialize();
 
   runApp( MyApp());

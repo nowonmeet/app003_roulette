@@ -58,7 +58,7 @@ class _AddEditPageState extends State<AddEditPage>
     _getLanguage();
 
     Future(() async {
-      await _refreshJournals();
+      await _refreshParts();
       await _addUsedColors();
       await _getTitle();
       await _initTextController();
@@ -163,7 +163,7 @@ class _AddEditPageState extends State<AddEditPage>
               },
             ),
           ),
-          resizeToAvoidBottomInset: false,
+          resizeToAvoidBottomInset: false,//キーボードが出ても画面が上がらないようにする
           body: _isLoading
               ? const Center(
                   child: CircularProgressIndicator(),
@@ -516,7 +516,7 @@ class _AddEditPageState extends State<AddEditPage>
 
 
 
-  Future<void> _refreshJournals() async {
+  Future<void> _refreshParts() async {
     //データベースの一覧をパーツに登録。画面更新用
     final data = await PartsViewModel.getNotes(widget.rouletteId ?? 0);
     setState(() {
@@ -588,7 +588,7 @@ class _AddEditPageState extends State<AddEditPage>
   Future<void> _addItem() async { //アイテムを追加
     await PartsViewModel.createItem(
         widget.rouletteId ?? 0, '', _notUsedColorsCheck(), 1);
-    await _refreshJournals();
+    await _refreshParts();
     await _addUsedColors();
     await _initTextController();//テキストコントローラーの初期化
     await _setTextController();//テキストコントローラーに値をセット
@@ -597,14 +597,14 @@ class _AddEditPageState extends State<AddEditPage>
 
   Future<void> _updateItem(int id, String name, int ratio) async {  //アイテムを更新
     await PartsViewModel.updateItem(id, name, ratio);
-    await _refreshJournals();
+    await _refreshParts();
     _addUsedColors();
     _isLoading = false;
   }
 
   Future<void> _deleteItem(int id) async {  //アイテムを削除
     await PartsViewModel.deleteItem(id);
-    await _refreshJournals();
+    await _refreshParts();
     await _addUsedColors();
     await _initTextController();
     await _setTextController();
@@ -632,7 +632,7 @@ class _AddEditPageState extends State<AddEditPage>
       if (result) {
         setState(() {
           Future(() async {
-            await _refreshJournals();
+            await _refreshParts();
             _addUsedColors();
           });
         });
