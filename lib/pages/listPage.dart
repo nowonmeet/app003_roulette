@@ -22,17 +22,15 @@ class ListPage extends StatefulWidget {
 class _ListPageState extends State<ListPage>
     with TickerProviderStateMixin //アニメーションが２つ以上
 {
-
-  var appLocalizations = AppLocalizations();//多言語対応用
+  var appLocalizations = AppLocalizations(); //多言語対応用
   var _languageCode = 'en'; //言語設定用
-  final _colorSelectList= ColorList().colorSelectList;//色一覧
+  final _colorSelectList = ColorList().colorSelectList; //色一覧
   final int _rouletteId = 0;
   int _checkRouletteId = 0;
   List<Map<String, dynamic>> _roulettes = []; //ルーレットのデータ
-  List<List<Map<String, dynamic>>> _roulettesAll = [];  //ルーレットの全データ
+  List<List<Map<String, dynamic>>> _roulettesAll = []; //ルーレットの全データ
   bool _isLoading = true; //画面更新グルグルに使う判定値
   bool _isDisabled = false; //ボタン連打防止用
-
 
   @override
   void initState() {
@@ -44,9 +42,6 @@ class _ListPageState extends State<ListPage>
       await _getLanguage();
     });
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +65,12 @@ class _ListPageState extends State<ListPage>
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
-          title: Text(appLocalizations.getTranslatedValue(_languageCode,'list')),
+          title: _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : Text(
+                  appLocalizations.getTranslatedValue(_languageCode, 'list')),
           automaticallyImplyLeading: false,
         ),
         body: _isLoading
@@ -87,11 +87,12 @@ class _ListPageState extends State<ListPage>
                           width: double.infinity,
                           height: _screenSize.height * 0.78,
                           child: GridView.count(
-                            padding: const EdgeInsets.only(bottom: 60),
+                              padding: const EdgeInsets.only(bottom: 60),
                               crossAxisCount: 2,
                               children: List.generate(
                                   _roulettes.length,
-                                  (index) => Card(//ルーレットの枠
+                                  (index) => Card(
+                                        //ルーレットの枠
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(10.0),
@@ -112,10 +113,12 @@ class _ListPageState extends State<ListPage>
                                                         _roulettes[index]
                                                             ['id']);
                                                   },
-                                                  style: ElevatedButton
-                                                      .styleFrom(
-                                                    foregroundColor: Colors.black45,
-                                                    backgroundColor: Colors.transparent,
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    foregroundColor:
+                                                        Colors.black45,
+                                                    backgroundColor:
+                                                        Colors.transparent,
                                                     elevation: 0,
                                                   ),
                                                   child: const Text(''),
@@ -123,15 +126,16 @@ class _ListPageState extends State<ListPage>
                                               ),
                                               Column(
                                                 children: <Widget>[
-
                                                   Padding(
-                                                    padding: const EdgeInsets.only(top: 8.0),
-                                                    child: Text(_roulettes[index]
-                                                        ['name']),
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            top: 8.0),
+                                                    child: Text(
+                                                        _roulettes[index]
+                                                            ['name']),
                                                   ),
                                                   Expanded(
-                                                    child:
-                                                        FractionallySizedBox(
+                                                    child: FractionallySizedBox(
                                                       widthFactor: 1.0,
                                                       heightFactor: 0.6,
                                                       child: Padding(
@@ -144,37 +148,31 @@ class _ListPageState extends State<ListPage>
                                                                 right: 40),
                                                         child: PieChart(
                                                           PieChartData(
-                                                              sectionsSpace:
-                                                                  1,
+                                                              sectionsSpace: 1,
                                                               centerSpaceRadius:
                                                                   10,
                                                               centerSpaceColor:
-                                                                  Colors
-                                                                      .white,
+                                                                  Colors.white,
                                                               startDegreeOffset:
                                                                   270,
                                                               sections: [
-                                                                for (var i =
-                                                                        0;
+                                                                for (var i = 0;
                                                                     i <
                                                                         _roulettesAll[index]
                                                                             .length;
                                                                     i++) ...{
                                                                   PieChartSectionData(
-                                                                    color: _colorSelectList[_roulettesAll[index]
+                                                                    color: _colorSelectList[
+                                                                        _roulettesAll[index][i]
                                                                             [
-                                                                            i]
-                                                                        [
-                                                                        'color']],
+                                                                            'color']],
                                                                     value: _roulettesAll[index][i]
                                                                             [
                                                                             'ratio'] /
                                                                         10,
-                                                                    radius:
-                                                                        40,
-                                                                    title: _roulettesAll[index]
-                                                                            [
-                                                                            i]
+                                                                    radius: 40,
+                                                                    title: _roulettesAll[
+                                                                            index][i]
                                                                         [
                                                                         'name'],
                                                                     titleStyle:
@@ -182,7 +180,8 @@ class _ListPageState extends State<ListPage>
                                                                       fontSize:
                                                                           8,
                                                                       overflow:
-                                                                          TextOverflow.ellipsis,
+                                                                          TextOverflow
+                                                                              .ellipsis,
                                                                     ),
                                                                   ),
                                                                 }
@@ -191,9 +190,11 @@ class _ListPageState extends State<ListPage>
                                                       ),
                                                     ),
                                                   ),
-                                                  Row(//編集、削除ボタン
+                                                  Row(
+                                                    //編集、削除ボタン
                                                     children: [
-                                                      IconButton(//削除ボタン
+                                                      IconButton(
+                                                          //削除ボタン
                                                           onPressed: () {
                                                             if (_roulettes
                                                                     .length <=
@@ -224,9 +225,7 @@ class _ListPageState extends State<ListPage>
                         ),
                       ),
                     ),
-
                     adContainer,
-
                   ],
                 ),
               ),
@@ -260,8 +259,10 @@ class _ListPageState extends State<ListPage>
       barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: Text(appLocalizations.getTranslatedValue(_languageCode,'attention')),
-          content: Text(appLocalizations.getTranslatedValue(_languageCode,'rouletteAttention')),
+          title: Text(
+              appLocalizations.getTranslatedValue(_languageCode, 'attention')),
+          content: Text(appLocalizations.getTranslatedValue(
+              _languageCode, 'rouletteAttention')),
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -281,18 +282,24 @@ class _ListPageState extends State<ListPage>
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return AlertDialog( // ダイアログの設定
-          title: Text(appLocalizations.getTranslatedValue(_languageCode,'check')),
-          content: Text(appLocalizations.getTranslatedValue(_languageCode,'deleteConfirmationMessage') + _roulettes[index]['name']),
+        return AlertDialog(
+          // ダイアログの設定
+          title:
+              Text(appLocalizations.getTranslatedValue(_languageCode, 'check')),
+          content: Text(appLocalizations.getTranslatedValue(
+                  _languageCode, 'deleteConfirmationMessage') +
+              _roulettes[index]['name']),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel',
+              child: const Text(
+                'Cancel',
                 style: TextStyle(color: Colors.black),
               ),
               onPressed: () => Navigator.of(context).pop(),
             ),
             TextButton(
-              child: const Text('OK',
+              child: const Text(
+                'OK',
                 style: TextStyle(color: Colors.black),
               ),
               onPressed: () {
@@ -306,30 +313,26 @@ class _ListPageState extends State<ListPage>
     );
   }
 
-
   //広告用
   // バナー広告をインスタンス化
-  final BannerAd myBanner = BannerAd(//広告用
+  final BannerAd myBanner = BannerAd(
+    //広告用
     adUnitId: AdIdManagement.listBannerAdUnitId,
     size: AdSize.banner,
     request: const AdRequest(),
     listener: const BannerAdListener(),
   );
 
-
-
-  _getLanguage() async {//Shared Preferenceから言語データを取得
+  _getLanguage() async {
+    //Shared Preferenceから言語データを取得
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _languageCode = prefs.getString('languageCode') ?? 'ja';
     });
   }
 
-
-
-
-
-  _getCheckRouletteId() async {//Shared PreferenceからルーレットIDデータを取得
+  _getCheckRouletteId() async {
+    //Shared PreferenceからルーレットIDデータを取得
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _checkRouletteId = prefs.getInt('rouletteId') ?? 1;
@@ -343,7 +346,6 @@ class _ListPageState extends State<ListPage>
     await prefs.setInt('rouletteId', _roulettes[0]['id']);
   }
 
-
   Future<void> _refreshJournals() async {
     //データベースの一覧をルーレットに登録。画面更新用
     final data = await RouletteViewModel.getNotes();
@@ -352,7 +354,8 @@ class _ListPageState extends State<ListPage>
     });
   }
 
-  Future<void> _getRouletteAll() async {  //データベースの一覧をルーレットに登録。画面更新用
+  Future<void> _getRouletteAll() async {
+    //データベースの一覧をルーレットに登録。画面更新用
     _roulettesAll = [];
     for (var i = 0; i < _roulettes.length; i++) {
       final data = await PartsViewModel.getNotes(_roulettes[i]['id']);
@@ -363,8 +366,8 @@ class _ListPageState extends State<ListPage>
     });
   }
 
-
-  _selectedRoulette(index) {//ルーレットを選択した時の処理
+  _selectedRoulette(index) {
+    //ルーレットを選択した時の処理
     if (_roulettes[index]['id'] == _rouletteId) {
       return Colors.black38;
     } else {
@@ -372,12 +375,13 @@ class _ListPageState extends State<ListPage>
     }
   }
 
-
-  void pushWithReloadByReturnAddEditPage(BuildContext context,index) async {//追加・編集画面に遷移する
+  void pushWithReloadByReturnAddEditPage(BuildContext context, index) async {
+    //追加・編集画面に遷移する
     final result = await Navigator.push(
       context,
       MaterialPageRoute<bool>(
-        builder: (BuildContext context) => AddEditPage(rouletteId: _roulettes[index]['id']),
+        builder: (BuildContext context) =>
+            AddEditPage(rouletteId: _roulettes[index]['id']),
       ),
     );
     if (result == null) {
@@ -393,9 +397,11 @@ class _ListPageState extends State<ListPage>
     }
   }
 
-  Future<void> _addItem() async { //ルーレット追加
+  Future<void> _addItem() async {
+    //ルーレット追加
     _isLoading = true;
-    await RouletteViewModel.createItem(appLocalizations.getTranslatedValue(_languageCode,'newRoulette'));
+    await RouletteViewModel.createItem(
+        appLocalizations.getTranslatedValue(_languageCode, 'newRoulette'));
 //      await RouletteViewModel.createItem('name',DateTime.now());
     final date = await RouletteViewModel.getLatestItem();
     await PartsViewModel.createItem(date[0]['id'], '', 0, 1);
@@ -404,17 +410,15 @@ class _ListPageState extends State<ListPage>
     await _getRouletteAll();
   }
 
-  Future<void> _deleteItem(int id) async { //ルーレット削除
+  Future<void> _deleteItem(int id) async {
+    //ルーレット削除
     _isLoading = true;
     await RouletteViewModel.deleteItem(id);
     await PartsViewModel.deleteRouletteItem(id);
     await _refreshJournals();
     await _getRouletteAll();
-    if(_checkRouletteId == id){
+    if (_checkRouletteId == id) {
       _setRouletteId();
     }
   }
-
-
-
 }

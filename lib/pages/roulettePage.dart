@@ -685,6 +685,8 @@ class _RoulettePageState extends State<RoulettePage>
                           ),
                           Expanded(child: Container()),
 
+                          //キーボードが出ている時は表示させない
+                          MediaQuery.of(context).viewInsets.bottom != 0 ? Container() :  // キーボードが出ている時にフォーカスを外す
                           adContainer,
                         ],
                       ),
