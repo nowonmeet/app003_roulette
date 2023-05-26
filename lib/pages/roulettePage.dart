@@ -15,7 +15,6 @@ import '../model/PartsViewModel.dart';
 import '../model/RouletteViewModel.dart';
 import '../model/applocalizations.dart';
 import '../model/contact_form.dart';
-import 'addEditPage.dart';
 import 'listPage.dart';
 
 class RoulettePage extends StatefulWidget {
@@ -88,14 +87,14 @@ class _RoulettePageState extends State<RoulettePage>
     final screenSize = MediaQuery.of(context).size; //画面サイズで指定用
     bottomSpace = 0; // この行がないとキーボードをしまう時にオーバーフローが発生
 
-    if (MediaQuery.of(context).viewInsets.bottom != 0) {
+    if (MediaQuery.of(context).viewInsets.bottom != 0) {// キーボードが出ている時に画面を上げる
       // キーボードが出ている時
       paddingBottom = 0;
       bottomSpace = MediaQuery.of(context).viewInsets.bottom - 60;
     } else {
       // キーボードが出ていない時
-      paddingBottom = 60.0;
       bottomSpace = 0.0;
+     paddingBottom = 60.0;
     }
 
 
@@ -218,7 +217,7 @@ class _RoulettePageState extends State<RoulettePage>
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => LanguageSelectionPage(),
+                        builder: (context) => const LanguageSelectionPage(),
                       ),
                     );
                   },
@@ -890,7 +889,7 @@ class _RoulettePageState extends State<RoulettePage>
       _isAnimation = true;
     });
 
-    await Future.delayed(Duration(milliseconds: 30));
+    await Future.delayed(const Duration(milliseconds: 30));
     setState(() {
       if (isEditing) {
         // 編集モードにする
