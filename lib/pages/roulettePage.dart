@@ -55,6 +55,7 @@ class _RoulettePageState extends State<RoulettePage>
   var _arrowIconSizeWidth = 30.0; //アニメーション中の矢印の幅サイズ
   var _rouletteShadow = 300.0; //ルーレットの影の大きさ
   var _editingSpaceHeigth = 0.0; //編集中のスペースの高さ
+  var _multiple = 1; //倍率
 
   @override
   void initState() {
@@ -67,10 +68,7 @@ class _RoulettePageState extends State<RoulettePage>
       await _getLanguage(); //言語設定を取得
 
       //アドエディットページ
-
-      //     await _refreshJournals();
       await _addUsedColors();
-//      await _getTitle();
       await _initTextController();
       await _setTextController();
       //     await _getLanguage();
@@ -246,6 +244,7 @@ class _RoulettePageState extends State<RoulettePage>
                                     IconButton(
                                       onPressed: () {
                                         _rouletteResult = '';
+                                        _multiple = 1;
                                         pushWithReloadByReturnListPage(context);
                                       },
                                       icon: const Icon(Icons.grid_view),
@@ -696,52 +695,72 @@ class _RoulettePageState extends State<RoulettePage>
               : isEditing
                   ? Container(
                       margin: const EdgeInsets.only(bottom: 48.0),
-                      child: FloatingActionButton(
-                        backgroundColor: Colors.white,
-                        onPressed: _isDisabled
-                            ? null
-                            : () async {
-                                setState(() => _isDisabled = true); //ボタンを無効
-                                await _addItem();
-                                await Future.delayed(
-                                  const Duration(milliseconds: 200), //無効にする時間
-                                );
-                                _scrollController.animateTo(
-                                  //スクロール
-                                  _scrollController.position.maxScrollExtent,
-                                  duration: const Duration(milliseconds: 500),
-                                  curve: Curves.linear,
-                                );
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 36.0),
+                        child: Row(
+                          children: [
+                            _multipleButton(),
+                            const Expanded(child: SizedBox()),
+                            FloatingActionButton(
+                              backgroundColor: Colors.white,
+                              onPressed: _isDisabled
+                                  ? null
+                                  : () async {
+                                      setState(() => _isDisabled = true); //ボタンを無効
+                                      await _addItem();
+                                      await Future.delayed(
+                                        const Duration(milliseconds: 200), //無効にする時間
+                                      );
+                                      _scrollController.animateTo(
+                                        //スクロール
+                                        _scrollController.position.maxScrollExtent,
+                                        duration: const Duration(milliseconds: 500),
+                                        curve: Curves.linear,
+                                      );
 
-                                await Future.delayed(
-                                  const Duration(milliseconds: 500), //無効にする時間
-                                );
+                                      await Future.delayed(
+                                        const Duration(milliseconds: 500), //無効にする時間
+                                      );
 
-                                setState(() => _isDisabled = false); //ボタンを有効
-                              },
-                        child: const Icon(Icons.add),
+                                      setState(() => _isDisabled = false); //ボタンを有効
+                                    },
+                              child: const Icon(Icons.add),
+                            ),
+                          ],
+                        ),
                       ),
                     )
                   : Container(
                       margin: const EdgeInsets.only(bottom: 48.0),
-                      child: FloatingActionButton(
-                        backgroundColor: Colors.white,
-                        onPressed: () async {
-                          _displayReset(); //結果表示をリセット
-                          _resultNumber = getRandomIndex(_ratioList);
-                          await _controller.rollTo(
-                            //結果の選択（ランダムで選択）
-                            _resultNumber,
-                            clockwise: _clockwise,
-                            offset:
-                                Random().nextDouble(), //項目内のずれ。1以上にすると別の項目に止まる
-                          );
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 36.0),
+                        child: Row(
+                          children: [
 
-                          _resultDisplay();
-                        },
-                        child: const Icon(Icons.refresh_rounded),
+                            _multipleButton(),
+                            const Expanded(child: SizedBox()),
+                            FloatingActionButton(
+                              backgroundColor: Colors.white,
+                              onPressed: () async {
+                                _displayReset(); //結果表示をリセット
+                                _resultNumber = getRandomIndex(_ratioList);
+                                await _controller.rollTo(
+                                  //結果の選択（ランダムで選択）
+                                  _resultNumber,
+                                  clockwise: _clockwise,
+                                  offset:
+                                  Random().nextDouble(), //項目内のずれ。1以上にすると別の項目に止まる
+                                );
+
+                                _resultDisplay();
+                              },
+                              child: const Icon(Icons.refresh_rounded),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         ),
       ),
     );
@@ -876,6 +895,23 @@ class _RoulettePageState extends State<RoulettePage>
     );
   }
 
+  //倍率のボタン
+  Widget _multipleButton() {
+    return FloatingActionButton(
+                backgroundColor: Colors.white,
+                onPressed: (){
+                  setState(() {
+                    _multiple ++;
+                    if(_multiple % 6 == 0){
+                      _multiple = 1;
+                    }
+                    _reloadRoulette();
+                  });
+                },
+                child: Text('x $_multiple'),
+                );
+  }
+
   //広告用
   // バナー広告をインスタンス化
   final BannerAd myBanner = BannerAd(
@@ -958,7 +994,9 @@ class _RoulettePageState extends State<RoulettePage>
     setState(() {
       _parts = data;
       _isLoading = false;
-      _group = RouletteGroup([
+      _group = RouletteGroup(
+          [
+            for(var j = 0; j < _multiple; j++)
         for (var i = 0; i < _parts.length; i++)
           RouletteUnit.text(_parts[i]['name'],
               color: _colorSelectList[_parts[i]['color']],
@@ -1280,11 +1318,13 @@ class _RoulettePageState extends State<RoulettePage>
   }
 
   Future<void> _addItem() async {
+
+    await _addUsedColors();   //使っているカラーを調べるためのリストを作成
+
     //アイテムを追加
     await PartsViewModel.createItem(
         _rouletteId, '', _notUsedColorsCheck(), 1);
     await _reloadRoulette();
-    await _addUsedColors();
     await _initTextController(); //テキストコントローラーの初期化
     await _setTextController(); //テキストコントローラーに値をセット
     _isLoading = false;
