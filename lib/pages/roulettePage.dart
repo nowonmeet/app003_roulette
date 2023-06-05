@@ -911,6 +911,8 @@ class _RoulettePageState extends State<RoulettePage>
                       _multiple = 1;
                     }
                     _reloadRoulette();
+                    //リザルトをリセット
+                    _rouletteResult = '';
                   });
                 },
                 child: Text('x $_multiple'),
