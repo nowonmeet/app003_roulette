@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:app_review/app_review.dart';
 
 class ContactForm extends StatelessWidget {
   final String _languageCode;
@@ -55,6 +56,28 @@ class ContactForm extends StatelessWidget {
     return appInformation;
   }
 
+  Future<void> openMail() async{
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: emailAddress,
+      queryParameters: {
+        'subject':appLocalizations.getTranslatedValue(_languageCode,'emailSubject'),
+        'body': appLocalizations.getTranslatedValue(_languageCode,'emailBody') + await getAppInformation(),
+        //カーソルを本文の先頭に設定する
+        'cursors': '0' // ここでカーソルを本文の先頭に設定します
+      },
+    );
+
+    try {
+      await launchUrlString(emailLaunchUri.toString());
+    } on PlatformException {
+      Clipboard.setData(ClipboardData(text: emailAddress));
+
+    }
+
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -64,27 +87,8 @@ class ContactForm extends StatelessWidget {
         appLocalizations.getTranslatedValue(_languageCode,'inquiry'),
       ),
       onTap: () async {
-        final Uri emailLaunchUri = Uri(
-          scheme: 'mailto',
-          path: emailAddress,
-          queryParameters: {
-            'subject':appLocalizations.getTranslatedValue(_languageCode,'emailSubject'),
-            'body': appLocalizations.getTranslatedValue(_languageCode,'emailBody') + await getAppInformation(),
-            'cursors': '0' // ここでカーソルを本文の先頭に設定します
-          },
-        );
 
-        try {
-          await launchUrlString(emailLaunchUri.toString());
-        } on PlatformException {
-          Clipboard.setData(ClipboardData(text: emailAddress));
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(
-                appLocalizations.getTranslatedValue(_languageCode,'emailError&Copy')
-            ),
-            duration: const Duration(seconds: 3),
-          ));
-        }
+        await openMail();
       },
     );
   }

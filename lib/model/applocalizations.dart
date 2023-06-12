@@ -43,6 +43,25 @@ static final Map<String, Map<String, String>> _localizedValues = {
     //色選択画面
     'colorTitle': 'Color Selection',
 
+    //レビューをお願いするポップアップ
+    'reviewTitle': 'Please review this app.',
+    'reviewMessage': 'Please review this app.\n\nYour review will help us improve this app.',
+    'reviewYes': 'Review',
+    'reviewNo': 'No, thanks',
+
+    //アプリを気に入ってもらえたか確認するポップアップを表示する。
+    'likeAppTitle': 'Did you like this app?',
+    'likeAppMessage': 'Did you like this app?\n\nPlease let us know what you liked about this app.',
+    'likeAppYes': 'Yes',
+    'likeAppNo': 'No, thanks',
+
+    //アプリを気に入ってもらえなかったユーザーに対して、要望メールを送ってもらうポップアップを表示する。
+    'requestTitle': 'Please send us your feedback.',
+    'requestMessage': 'Please send us your feedback.\n\nYour feedback will help us improve this app.',
+    'requestYes': 'Send',
+    'requestNo': 'No, thanks',
+
+
   },
   'ja': {
     //起動アプリ一覧で表示するタイトル
@@ -84,6 +103,25 @@ static final Map<String, Map<String, String>> _localizedValues = {
 
     //色選択画面
     'colorTitle': '色選択',
+
+    //レビューをお願いするポップアップ
+    'reviewTitle': 'レビューをお願いします',
+    'reviewMessage': 'このアプリは無料で提供しています。\n\nレビューをしていただけると、開発の励みになります。\n\nよろしくお願いします。',
+    'reviewYes': 'レビューする',
+    'reviewNo': '後で',
+
+    //アプリを気に入ってもらえたか確認するポップアップを表示する。
+    'likeAppTitle': 'このアプリは気に入ってもらえましたか？',
+    'likeAppMessage': '率直なご意見をお願いします。',
+    'likeAppYes': '気に入った',
+    'likeAppNo': '気に入らなかった',
+
+    //アプリを気に入ってもらえなかったユーザーに対して、要望メールを送ってもらうポップアップを表示する。
+    'requestTitle': 'ご意見をお聞かせください',
+    'requestMessage': 'アプリを気に入ってもらえなかった理由を教えてください。\n\n今後のアプリ改善に役立てさせていただきます。',
+    'requestYes': '送信する',
+    'requestNo': '送信しない',
+
   },
 };
 

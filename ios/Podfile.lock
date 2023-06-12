@@ -1,4 +1,6 @@
 PODS:
+  - app_review (1.0.1):
+    - Flutter
   - device_info_plus (0.0.1):
     - Flutter
   - Flutter (1.0.0)
@@ -56,6 +58,8 @@ PODS:
     - nanopb/encode (= 2.30908.0)
   - nanopb/decode (2.30908.0)
   - nanopb/encode (2.30908.0)
+  - package_info (0.0.1):
+    - Flutter
   - package_info_plus (0.4.5):
     - Flutter
   - PromisesObjC (2.1.0)
@@ -71,10 +75,12 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
+  - app_review (from `.symlinks/plugins/app_review/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
   - google_mobile_ads (from `.symlinks/plugins/google_mobile_ads/ios`)
+  - package_info (from `.symlinks/plugins/package_info/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
@@ -92,6 +98,8 @@ SPEC REPOS:
     - PromisesObjC
 
 EXTERNAL SOURCES:
+  app_review:
+    :path: ".symlinks/plugins/app_review/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   Flutter:
@@ -100,6 +108,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_native_splash/ios"
   google_mobile_ads:
     :path: ".symlinks/plugins/google_mobile_ads/ios"
+  package_info:
+    :path: ".symlinks/plugins/package_info/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   shared_preferences_foundation:
@@ -112,6 +122,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/webview_flutter_wkwebview/ios"
 
 SPEC CHECKSUMS:
+  app_review: 6f51001269c59a2f4a5b5ae68b7d106401152764
   device_info_plus: e5c5da33f982a436e103237c0c85f9031142abed
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_native_splash: 52501b97d1c0a5f898d687f1646226c1f93c56ef
@@ -122,6 +133,7 @@ SPEC CHECKSUMS:
   GoogleUserMessagingPlatform: ab890ce5f6620f293a21b6bdd82e416a2c73aeca
   GoogleUtilities: e0913149f6b0625b553d70dae12b49fc62914fd1
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
+  package_info: 873975fc26034f0b863a300ad47e7f1ac6c7ec62
   package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
   PromisesObjC: 99b6f43f9e1044bd87a95a60beff28c2c44ddb72
   shared_preferences_foundation: 297b3ebca31b34ec92be11acd7fb0ba932c822ca

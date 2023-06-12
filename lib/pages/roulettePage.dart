@@ -1,15 +1,18 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:app003_roulette/model/adIdManagement.dart';
 import 'package:app003_roulette/model/colorList.dart';
 import 'package:app003_roulette/pages/colorSelectPage.dart';
 import 'package:app003_roulette/pages/language_selection_page.dart';
+import 'package:app_review/app_review.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:roulette/roulette.dart';
 import 'dart:math' as math;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import '../model/PartsViewModel.dart';
 import '../model/RouletteViewModel.dart';
@@ -59,6 +62,7 @@ class _RoulettePageState extends State<RoulettePage>
 
   @override
   void initState() {
+
     //画面構築時
     Future(() async {
       await _firstStartup(); //初回起動時の処理
@@ -76,8 +80,22 @@ class _RoulettePageState extends State<RoulettePage>
       _isLoading = false;
     });
     super.initState();
+    AppReview.getAppID.then(log);
+
     _rouletteResult = ''; //結果表示用
   }
+
+  void log(String? message) {
+    if (message != null) {
+      setState(() {
+        output = message;
+      });
+      print(message);
+    }
+  }
+
+  String appID = "";
+  String output = "";
 
   @override
   Widget build(BuildContext context) {
@@ -222,6 +240,29 @@ class _RoulettePageState extends State<RoulettePage>
                       );
                     },
                   ),
+
+                  //レビュー機能実装途中。一旦休憩
+                  //
+                  // ListTile(
+                  //   title: Text( 'レビューに遷移'),
+                  //   leading: const Icon(Icons.info),
+                  //   onTap: () {
+                  //     //レビューポップアップを表示。
+                  //     _likeAppPopup();
+                  //   },
+                  // ),
+                  // ListTile(
+                  //   leading: const Icon(
+                  //     Icons.star,
+                  //   ),
+                  //   title: const Text('Request Review'),
+                  //   onTap: () {
+                  //     AppReview.requestReview.then(log);
+                  //   },
+                  // ),
+
+                  //レビュー機能実装途中。一旦休憩
+
                 ],
               ),
             ),
@@ -917,6 +958,123 @@ class _RoulettePageState extends State<RoulettePage>
                 },
                 child: Text('x $_multiple'),
                 );
+  }
+
+  //レビューをお願いするポップアップ
+  void _reviewPopup() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(appLocalizations.getTranslatedValue(
+              _languageCode, 'reviewTitle')),
+          content: Text(appLocalizations.getTranslatedValue(
+              _languageCode, 'reviewMessage')),
+          actions: <Widget>[
+            TextButton(
+              child: Text(appLocalizations.getTranslatedValue(
+                  _languageCode, 'reviewNo')),
+              onPressed: () => Navigator.pop(context),
+            ),
+            TextButton(
+              child: Text(appLocalizations.getTranslatedValue(
+                  _languageCode, 'reviewYes')),
+              onPressed: () {
+                Navigator.pop(context);
+                _review();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  //アプリを気に入ってもらえたか確認するポップアップを表示する。気に入ってもらえたら_reviewPopup()を実行、気に入ってもらえなかったら、メールで要望を送ってもらうポップアップを表示。
+  void _likeAppPopup() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(appLocalizations.getTranslatedValue(
+              _languageCode, 'likeAppTitle')),
+          content: Text(appLocalizations.getTranslatedValue(
+              _languageCode, 'likeAppMessage')),
+          actions: <Widget>[
+            TextButton(
+              child: Text(appLocalizations.getTranslatedValue(
+                  _languageCode, 'likeAppNo')),
+              onPressed: () { Navigator.pop(context);
+                _requestPopup();
+              }
+            ),
+            TextButton(
+              child: Text(appLocalizations.getTranslatedValue(
+                  _languageCode, 'likeAppYes')),
+              onPressed: () {
+                Navigator.pop(context);
+                _reviewPopup();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  //アプリを気に入ってもらえなかったユーザーに対して、要望メールを送ってもらうポップアップを表示する。
+  void _requestPopup() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(appLocalizations.getTranslatedValue(
+              _languageCode, 'requestTitle')),
+          content: Text(appLocalizations.getTranslatedValue(
+              _languageCode, 'requestMessage')),
+          actions: <Widget>[
+            TextButton(
+              child: Text(appLocalizations.getTranslatedValue(
+                  _languageCode, 'requestNo')),
+              onPressed: () => Navigator.pop(context),
+            ),
+            TextButton(
+              child: Text(appLocalizations.getTranslatedValue(
+                  _languageCode, 'requestYes')),
+              onPressed: () {//contactFormが使えないので、一旦コメントアウト 2021/08/10
+                ContactForm(languageCode: _languageCode).openMail();
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  //要望メールを送る処理
+
+
+  //OSに応じてレビューに遷移する処理
+  void _review() async {
+
+    if (Platform.isAndroid) {
+      //Androidの場合
+      const url =
+          'https://play.google.com/store/apps/details?id=com.app003_roulette.app003_roulette';
+      if (await canLaunchUrlString(url)) {
+        await launchUrlString(url);
+      } else {
+        throw 'Could not launch $url';
+      }
+    } else if (Platform.isIOS) {
+      //iOSの場合
+      AppReview.requestReview.then(log);
+    }
+    //レビューをお願いしたら、レビューをお願いしたことを記録する
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('review', true);
+
   }
 
   //広告用

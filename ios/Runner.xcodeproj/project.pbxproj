@@ -365,18 +365,18 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = D7Y723ZTC8;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 2.0.1;
-				FLUTTER_BUILD_NUMBER = 6;
+				FLUTTER_BUILD_NAME = 2.0.2;
+				FLUTTER_BUILD_NUMBER = 7;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.1;
+				MARKETING_VERSION = 2.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.app003roulette.app003Roulette;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -506,17 +506,17 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = D7Y723ZTC8;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 2.0.1;
-				FLUTTER_BUILD_NUMBER = 6;
+				FLUTTER_BUILD_NAME = 2.0.2;
+				FLUTTER_BUILD_NUMBER = 7;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.1;
+				MARKETING_VERSION = 2.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.app003roulette.app003Roulette;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -539,18 +539,18 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = D7Y723ZTC8;
 				ENABLE_BITCODE = NO;
-				FLUTTER_BUILD_NAME = 2.0.1;
-				FLUTTER_BUILD_NUMBER = 6;
+				FLUTTER_BUILD_NAME = 2.0.2;
+				FLUTTER_BUILD_NUMBER = 7;
 				INFOPLIST_FILE = Runner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.1;
+				MARKETING_VERSION = 2.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.app003roulette.app003Roulette;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
