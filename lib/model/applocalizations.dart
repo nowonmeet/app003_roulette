@@ -32,9 +32,9 @@ static final Map<String, Map<String, String>> _localizedValues = {
 
 
     //ルーレット編集
-    'titleEdit': 'Roulette Title (Max 24 chars)',
+    'titleEdit': 'Roulette Title',
     'titleHintText': 'Please enter the title.',
-    'partsEdit': 'Item Name (Max 16 chars)',
+    'partsEdit': 'Item Name',
     'partsHintText': 'Please enter the item name.',
     'partsAttention': 'Item name is required at least two.',
     'ratioEdit': 'Ratio',
@@ -93,9 +93,9 @@ static final Map<String, Map<String, String>> _localizedValues = {
     'newRoulette': '新しいルーレット',
 
     //ルーレット編集
-    'titleEdit': 'ルーレットタイトル（最大12文字）',
+    'titleEdit': 'ルーレットタイトル',
     'titleHintText':'ルーレットタイトルを入力',
-    'partsEdit': '項目名（最大8文字）',
+    'partsEdit': '項目名',
     'partsHintText':'ルーレットタイトルを入力',
     'partsAttention':'項目は2つ以上必要です。',
     'ratioEdit': '比率',

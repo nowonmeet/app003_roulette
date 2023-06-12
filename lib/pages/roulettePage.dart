@@ -62,7 +62,6 @@ class _RoulettePageState extends State<RoulettePage>
 
   @override
   void initState() {
-
     //画面構築時
     Future(() async {
       await _firstStartup(); //初回起動時の処理
@@ -103,17 +102,16 @@ class _RoulettePageState extends State<RoulettePage>
     final screenSize = MediaQuery.of(context).size; //画面サイズで指定用
     bottomSpace = 0; // この行がないとキーボードをしまう時にオーバーフローが発生
 
-    if (MediaQuery.of(context).viewInsets.bottom != 0) {// キーボードが出ている時に画面を上げる
+    if (MediaQuery.of(context).viewInsets.bottom != 0) {
+      // キーボードが出ている時に画面を上げる
       // キーボードが出ている時
       paddingBottom = 0;
       bottomSpace = MediaQuery.of(context).viewInsets.bottom - 60;
     } else {
       // キーボードが出ていない時
       bottomSpace = 0.0;
-     paddingBottom = 60.0;
+      paddingBottom = 60.0;
     }
-
-
 
     //
     myBanner.load();
@@ -156,8 +154,8 @@ class _RoulettePageState extends State<RoulettePage>
                           child: TextFormField(
                             controller: titleController,
                             cursorColor: Colors.black12,
-                            maxLength: titleMaxLength,
-                            maxLengthEnforcement: MaxLengthEnforcement.enforced,
+//                            maxLength: titleMaxLength,
+//                            maxLengthEnforcement: MaxLengthEnforcement.enforced,
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.symmetric(
                                 vertical: 8,
@@ -198,7 +196,11 @@ class _RoulettePageState extends State<RoulettePage>
                             }
                           },
                         )
-                      : Text(_rouletteTitle),
+                      : Text(
+                          _rouletteTitle,
+                          //オーバフローエラーがおこらないようにする
+                          overflow: TextOverflow.ellipsis,
+                        ),
             ),
             endDrawer: Drawer(
               child: ListView(
@@ -209,7 +211,8 @@ class _RoulettePageState extends State<RoulettePage>
                             fit: BoxFit.fitHeight,
                             image: AssetImage('lib/assets/drawer.png'))),
                     child: Text(
-                      appLocalizations.getTranslatedValue(_languageCode, 'menu'),
+                      appLocalizations.getTranslatedValue(
+                          _languageCode, 'menu'),
                     ),
                   ),
                   ListTile(
@@ -262,7 +265,6 @@ class _RoulettePageState extends State<RoulettePage>
                   // ),
 
                   //レビュー機能実装途中。一旦休憩
-
                 ],
               ),
             ),
@@ -288,7 +290,8 @@ class _RoulettePageState extends State<RoulettePage>
                                         onPressed: () {
                                           _rouletteResult = '';
                                           _multiple = 1;
-                                          pushWithReloadByReturnListPage(context);
+                                          pushWithReloadByReturnListPage(
+                                              context);
                                         },
                                         icon: const Icon(Icons.grid_view),
                                         iconSize: 48,
@@ -316,6 +319,8 @@ class _RoulettePageState extends State<RoulettePage>
                                   Padding(
                                     padding: const EdgeInsets.only(top: 20.0),
                                     child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Padding(
                                           padding: const EdgeInsets.only(
@@ -328,9 +333,13 @@ class _RoulettePageState extends State<RoulettePage>
                                             ),
                                           ),
                                         ),
-                                        Text(
-                                          _rouletteResult,
-                                          style: const TextStyle(fontSize: 24),
+                                        Expanded(
+                                          child: Text(
+                                            _rouletteResult,
+                                            overflow: TextOverflow.ellipsis,
+                                            style:
+                                                const TextStyle(fontSize: 24),
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -395,10 +404,10 @@ class _RoulettePageState extends State<RoulettePage>
                                         elevation: 10,
                                         shape: const BeveledRectangleBorder(
                                           borderRadius: BorderRadius.only(
-                                              bottomRight:
-                                                  Radius.circular(double.infinity),
-                                              bottomLeft:
-                                                  Radius.circular(double.infinity)),
+                                              bottomRight: Radius.circular(
+                                                  double.infinity),
+                                              bottomLeft: Radius.circular(
+                                                  double.infinity)),
                                         ),
                                       ),
                                       child: const Text(''),
@@ -412,12 +421,18 @@ class _RoulettePageState extends State<RoulettePage>
                                   visible: isEditing,
                                   child: IconButton(
                                     onPressed: () {
-                                      if(MediaQuery.of(context).viewInsets.bottom!=0){  // キーボードが出ている時にフォーカスを外す
+                                      if (MediaQuery.of(context)
+                                              .viewInsets
+                                              .bottom !=
+                                          0) {
+                                        // キーボードが出ている時にフォーカスを外す
+                                        //エミュレーターでは機能しない。
                                         FocusScope.of(context).unfocus();
+                                      } else {
+                                        // フォーカスを外す
+                                        _rouletteResult = '';
+                                        editMode();
                                       }
-                                      else{// フォーカスを外す
-                                      _rouletteResult = '';
-                                      editMode();}
                                     },
                                     icon: const Icon(Icons.check_box_rounded),
                                     iconSize: 48,
@@ -441,18 +456,19 @@ class _RoulettePageState extends State<RoulettePage>
                                   child: SingleChildScrollView(
                                     //アドエディットページ
                                     child: SizedBox(
-                                      height: screenSize.height * 0.5 - bottomSpace,
+                                      height:
+                                          screenSize.height * 0.5 - bottomSpace,
                                       width: double.infinity,
                                       child: ListView.builder(
                                           controller: _scrollController,
                                           itemCount: _parts.length,
                                           padding: EdgeInsets.only(
                                               bottom: paddingBottom),
-                                          itemBuilder:
-                                              (BuildContext context, int index) {
+                                          itemBuilder: (BuildContext context,
+                                              int index) {
                                             return Padding(
-                                              padding:
-                                                  const EdgeInsets.only(left: 8.0),
+                                              padding: const EdgeInsets.only(
+                                                  left: 8.0),
                                               child: Container(
                                                 height: 80,
                                                 color: Colors.white,
@@ -474,8 +490,8 @@ class _RoulettePageState extends State<RoulettePage>
                                                             .styleFrom(
                                                           backgroundColor:
                                                               _colorSelectList[
-                                                                  _parts[index]
-                                                                      ['color']],
+                                                                  _parts[index][
+                                                                      'color']],
                                                         ),
                                                         child: null,
                                                       ),
@@ -484,8 +500,8 @@ class _RoulettePageState extends State<RoulettePage>
                                                       //項目名
                                                       child: Padding(
                                                         padding:
-                                                            const EdgeInsets.all(
-                                                                8.0),
+                                                            const EdgeInsets
+                                                                .all(8.0),
                                                         child: Focus(
                                                           child: TextFormField(
 //                                              textInputAction: TextInputAction.next,
@@ -494,11 +510,11 @@ class _RoulettePageState extends State<RoulettePage>
                                                                     index],
                                                             cursorColor:
                                                                 Colors.black12,
-                                                            maxLength:
-                                                                itemNameMaxLength,
-                                                            maxLengthEnforcement:
-                                                                MaxLengthEnforcement
-                                                                    .enforced,
+                                                            // maxLength:
+                                                            //     itemNameMaxLength,
+                                                            // maxLengthEnforcement:
+                                                            //     MaxLengthEnforcement
+                                                            //         .enforced,
                                                             decoration:
                                                                 InputDecoration(
                                                               labelText: appLocalizations
@@ -509,11 +525,10 @@ class _RoulettePageState extends State<RoulettePage>
                                                                   .getTranslatedValue(
                                                                       _languageCode,
                                                                       'partsHintText'),
-                                                              hintStyle:
-                                                                  const TextStyle(
-                                                                      fontSize: 12,
-                                                                      color: Colors
-                                                                          .black45),
+                                                              hintStyle: const TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Colors
+                                                                      .black45),
                                                               fillColor:
                                                                   Colors.white,
                                                               filled: true,
@@ -557,10 +572,9 @@ class _RoulettePageState extends State<RoulettePage>
                                                                   itemNameController[
                                                                           index]
                                                                       .text,
-                                                                  int.parse(
-                                                                      ratioController[
-                                                                              index]
-                                                                          .text));
+                                                                  int.parse(ratioController[
+                                                                          index]
+                                                                      .text));
                                                             }
                                                           },
                                                         ),
@@ -571,7 +585,8 @@ class _RoulettePageState extends State<RoulettePage>
                                                       width: 60,
                                                       child: Padding(
                                                         padding:
-                                                            const EdgeInsets.only(
+                                                            const EdgeInsets
+                                                                    .only(
                                                                 left: 4.0),
                                                         child: Focus(
                                                           child: TextFormField(
@@ -581,15 +596,16 @@ class _RoulettePageState extends State<RoulettePage>
                                                                     .enforced,
                                                             onTap: () {
                                                               //選択時に全選択
-                                                              ratioController[index]
+                                                              ratioController[
+                                                                          index]
                                                                       .selection =
                                                                   TextSelection(
-                                                                      baseOffset: 0,
-                                                                      extentOffset:
-                                                                          ratioController[
-                                                                                  index]
-                                                                              .text
-                                                                              .length);
+                                                                      baseOffset:
+                                                                          0,
+                                                                      extentOffset: ratioController[
+                                                                              index]
+                                                                          .text
+                                                                          .length);
                                                             },
                                                             keyboardType:
                                                                 TextInputType
@@ -605,12 +621,12 @@ class _RoulettePageState extends State<RoulettePage>
                                                                   .getTranslatedValue(
                                                                       _languageCode,
                                                                       'ratioEdit'),
-                                                              hintText: '$index ',
-                                                              hintStyle:
-                                                                  const TextStyle(
-                                                                      fontSize: 12,
-                                                                      color: Colors
-                                                                          .black45),
+                                                              hintText:
+                                                                  '$index ',
+                                                              hintStyle: const TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Colors
+                                                                      .black45),
                                                               fillColor:
                                                                   Colors.white,
                                                               counterText: "",
@@ -654,10 +670,9 @@ class _RoulettePageState extends State<RoulettePage>
                                                                   itemNameController[
                                                                           index]
                                                                       .text,
-                                                                  int.parse(
-                                                                      ratioController[
-                                                                              index]
-                                                                          .text));
+                                                                  int.parse(ratioController[
+                                                                          index]
+                                                                      .text));
                                                             }
                                                           },
                                                         ),
@@ -672,46 +687,51 @@ class _RoulettePageState extends State<RoulettePage>
                                                           Icons.delete,
                                                           size: 40,
                                                         ),
-                                                          onPressed: () {
-                                                            if(MediaQuery.of(context).viewInsets.bottom!=0){  // キーボードが出ている時にフォーカスを外す
-                                                              FocusScope.of(context).unfocus();
-                                                            }
-                                                            else{// フォーカスを外す
-                                                          _parts.length <= 2
-                                                              ? showDialog(
-                                                                  context: context,
-                                                                  barrierDismissible:
-                                                                      false,
-                                                                  builder:
-                                                                      (context) {
-                                                                    return AlertDialog(
-                                                                      title: Text(appLocalizations
-                                                                          .getTranslatedValue(
-                                                                              _languageCode,
-                                                                              'attention')),
-                                                                      content: Text(
-                                                                        appLocalizations.getTranslatedValue(
+                                                        onPressed: () {
+                                                          if (MediaQuery.of(
+                                                                      context)
+                                                                  .viewInsets
+                                                                  .bottom !=
+                                                              0) {
+                                                            // キーボードが出ている時にフォーカスを外す
+                                                            FocusScope.of(
+                                                                    context)
+                                                                .unfocus();
+                                                          } else {
+                                                            // フォーカスを外す
+                                                            _parts.length <= 2
+                                                                ? showDialog(
+                                                                    context:
+                                                                        context,
+                                                                    barrierDismissible:
+                                                                        false,
+                                                                    builder:
+                                                                        (context) {
+                                                                      return AlertDialog(
+                                                                        title: Text(appLocalizations.getTranslatedValue(
                                                                             _languageCode,
-                                                                            'partsAttention'),
-                                                                      ),
-                                                                      actions: [
-                                                                        TextButton(
-                                                                            onPressed: () =>
-                                                                                Navigator.pop(
-                                                                                    context),
-                                                                            child:
-                                                                                const Text(
-                                                                              'OK',
-                                                                              style:
-                                                                                  TextStyle(color: Colors.black),
-                                                                            ))
-                                                                      ],
-                                                                    );
-                                                                  },
-                                                                ) //アラートを表示
-                                                              : _deleteItem(
-                                                                  _parts[index]
-                                                                      ['id']);}
+                                                                            'attention')),
+                                                                        content:
+                                                                            Text(
+                                                                          appLocalizations.getTranslatedValue(
+                                                                              _languageCode,
+                                                                              'partsAttention'),
+                                                                        ),
+                                                                        actions: [
+                                                                          TextButton(
+                                                                              onPressed: () => Navigator.pop(context),
+                                                                              child: const Text(
+                                                                                'OK',
+                                                                                style: TextStyle(color: Colors.black),
+                                                                              ))
+                                                                        ],
+                                                                      );
+                                                                    },
+                                                                  ) //アラートを表示
+                                                                : _deleteItem(
+                                                                    _parts[index]
+                                                                        ['id']);
+                                                          }
                                                         },
                                                       ),
                                                     )
@@ -728,8 +748,10 @@ class _RoulettePageState extends State<RoulettePage>
                             Expanded(child: Container()),
 
                             //キーボードが出ている時は表示させない
-                            MediaQuery.of(context).viewInsets.bottom != 0 ? Container() :  // キーボードが出ている時にフォーカスを外す
-                            adContainer,
+                            MediaQuery.of(context).viewInsets.bottom != 0
+                                ? Container()
+                                : // キーボードが出ている時にフォーカスを外す
+                                adContainer,
                           ],
                         ),
                       ),
@@ -749,23 +771,29 @@ class _RoulettePageState extends State<RoulettePage>
                                 onPressed: _isDisabled
                                     ? null
                                     : () async {
-                                        setState(() => _isDisabled = true); //ボタンを無効
+                                        setState(
+                                            () => _isDisabled = true); //ボタンを無効
                                         await _addItem();
                                         await Future.delayed(
-                                          const Duration(milliseconds: 200), //無効にする時間
+                                          const Duration(
+                                              milliseconds: 200), //無効にする時間
                                         );
                                         _scrollController.animateTo(
                                           //スクロール
-                                          _scrollController.position.maxScrollExtent,
-                                          duration: const Duration(milliseconds: 500),
+                                          _scrollController
+                                              .position.maxScrollExtent,
+                                          duration:
+                                              const Duration(milliseconds: 500),
                                           curve: Curves.linear,
                                         );
 
                                         await Future.delayed(
-                                          const Duration(milliseconds: 500), //無効にする時間
+                                          const Duration(
+                                              milliseconds: 500), //無効にする時間
                                         );
 
-                                        setState(() => _isDisabled = false); //ボタンを有効
+                                        setState(
+                                            () => _isDisabled = false); //ボタンを有効
                                       },
                                 child: const Icon(Icons.add),
                               ),
@@ -779,21 +807,21 @@ class _RoulettePageState extends State<RoulettePage>
                           padding: const EdgeInsets.only(left: 36.0),
                           child: Row(
                             children: [
-
                               _multipleButton(),
                               const Expanded(child: SizedBox()),
                               FloatingActionButton(
                                 backgroundColor: Colors.white,
                                 onPressed: () async {
-                                  setState(() => _isDisabledRolling = true); //ボタンを無効
+                                  setState(
+                                      () => _isDisabledRolling = true); //ボタンを無効
                                   _displayReset(); //結果表示をリセット
                                   _resultNumber = getRandomIndex(_ratioList);
                                   await _controller.rollTo(
                                     //結果の選択（ランダムで選択）
                                     _resultNumber,
                                     clockwise: _clockwise,
-                                    offset:
-                                    Random().nextDouble(), //項目内のずれ。1以上にすると別の項目に止まる
+                                    offset: Random()
+                                        .nextDouble(), //項目内のずれ。1以上にすると別の項目に止まる
                                   );
                                   _isDisabledRolling = false; //ボタンを有効
 
@@ -944,20 +972,20 @@ class _RoulettePageState extends State<RoulettePage>
   //倍率のボタン
   Widget _multipleButton() {
     return FloatingActionButton(
-                backgroundColor: Colors.white,
-                onPressed: (){
-                  setState(() {
-                    _multiple ++;
-                    if(_multiple % 6 == 0){
-                      _multiple = 1;
-                    }
-                    _reloadRoulette();
-                    //リザルトをリセット
-                    _rouletteResult = '';
-                  });
-                },
-                child: Text('x $_multiple'),
-                );
+      backgroundColor: Colors.white,
+      onPressed: () {
+        setState(() {
+          _multiple++;
+          if (_multiple % 6 == 0) {
+            _multiple = 1;
+          }
+          _reloadRoulette();
+          //リザルトをリセット
+          _rouletteResult = '';
+        });
+      },
+      child: Text('x $_multiple'),
+    );
   }
 
   //レビューをお願いするポップアップ
@@ -1002,12 +1030,12 @@ class _RoulettePageState extends State<RoulettePage>
               _languageCode, 'likeAppMessage')),
           actions: <Widget>[
             TextButton(
-              child: Text(appLocalizations.getTranslatedValue(
-                  _languageCode, 'likeAppNo')),
-              onPressed: () { Navigator.pop(context);
-                _requestPopup();
-              }
-            ),
+                child: Text(appLocalizations.getTranslatedValue(
+                    _languageCode, 'likeAppNo')),
+                onPressed: () {
+                  Navigator.pop(context);
+                  _requestPopup();
+                }),
             TextButton(
               child: Text(appLocalizations.getTranslatedValue(
                   _languageCode, 'likeAppYes')),
@@ -1041,7 +1069,8 @@ class _RoulettePageState extends State<RoulettePage>
             TextButton(
               child: Text(appLocalizations.getTranslatedValue(
                   _languageCode, 'requestYes')),
-              onPressed: () {//contactFormが使えないので、一旦コメントアウト 2021/08/10
+              onPressed: () {
+                //contactFormが使えないので、一旦コメントアウト 2021/08/10
                 ContactForm(languageCode: _languageCode).openMail();
                 Navigator.pop(context);
               },
@@ -1054,10 +1083,8 @@ class _RoulettePageState extends State<RoulettePage>
 
   //要望メールを送る処理
 
-
   //OSに応じてレビューに遷移する処理
   void _review() async {
-
     if (Platform.isAndroid) {
       //Androidの場合
       const url =
@@ -1074,7 +1101,6 @@ class _RoulettePageState extends State<RoulettePage>
     //レビューをお願いしたら、レビューをお願いしたことを記録する
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('review', true);
-
   }
 
   //広告用
@@ -1159,34 +1185,33 @@ class _RoulettePageState extends State<RoulettePage>
     setState(() {
       _parts = data;
       _isLoading = false;
-      _group = RouletteGroup(
-          [
-            for(var j = 0; j < _multiple; j++)
-        for (var i = 0; i < _parts.length; i++)
-          RouletteUnit.text(_parts[i]['name'],
-              color: _colorSelectList[_parts[i]['color']],
-              weight: _parts[i]['ratio'] / 10, //見た目の比率
-              textStyle: isEditing
-                  ? const TextStyle(
-                      fontSize: 10,
-                      shadows: <Shadow>[
-                        Shadow(
-                          color: Colors.black,
-                          offset: Offset(0.7, 0.7),
-                          blurRadius: 3.0,
-                        ),
-                      ],
-                    )
-                  : const TextStyle(
-                      fontSize: 14,
-                      shadows: <Shadow>[
-                        Shadow(
-                          color: Colors.black,
-                          offset: Offset(1.0, 1.0),
-                          blurRadius: 3.0,
-                        ),
-                      ],
-                    )),
+      _group = RouletteGroup([
+        for (var j = 0; j < _multiple; j++)
+          for (var i = 0; i < _parts.length; i++)
+            RouletteUnit.text(_parts[i]['name'],
+                color: _colorSelectList[_parts[i]['color']],
+                weight: _parts[i]['ratio'] / 10, //見た目の比率
+                textStyle: isEditing
+                    ? const TextStyle(
+                        fontSize: 10,
+                        shadows: <Shadow>[
+                          Shadow(
+                            color: Colors.black,
+                            offset: Offset(0.7, 0.7),
+                            blurRadius: 3.0,
+                          ),
+                        ],
+                      )
+                    : const TextStyle(
+                        fontSize: 14,
+                        shadows: <Shadow>[
+                          Shadow(
+                            color: Colors.black,
+                            offset: Offset(1.0, 1.0),
+                            blurRadius: 3.0,
+                          ),
+                        ],
+                      )),
       ]);
     });
   }
@@ -1236,7 +1261,6 @@ class _RoulettePageState extends State<RoulettePage>
       _isLanguageSelected = prefs.getBool('isLanguageSelected') ?? false;
     });
   }
-
 
   Future<void> _getIsEmptyRoulette() async {
     //ルーレットが空かどうか判別する。
@@ -1358,14 +1382,12 @@ class _RoulettePageState extends State<RoulettePage>
     } else {
       _rouletteId = result;
     }
-      _setRouletteId();  //ルーレットIDをSharedPreferenceに保存
-      await _getTitle(_rouletteId); //ルーレットのタイトルを取得
-      await _reloadRoulette();  //ルーレットを再読み込み
-      await _initTextController();  //テキストコントローラーを初期化
-      await _setTextController(); //テキストコントローラーに値を入れる
-    setState(() {
-
-    });
+    _setRouletteId(); //ルーレットIDをSharedPreferenceに保存
+    await _getTitle(_rouletteId); //ルーレットのタイトルを取得
+    await _reloadRoulette(); //ルーレットを再読み込み
+    await _initTextController(); //テキストコントローラーを初期化
+    await _setTextController(); //テキストコントローラーに値を入れる
+    setState(() {});
   }
 
   @override
@@ -1391,7 +1413,6 @@ class _RoulettePageState extends State<RoulettePage>
   var titleMaxLength = 24; //タイトルの最大文字数
   var itemNameMaxLength = 16; //アイテム名の最大文字数
   final focusNode = FocusNode();
-
 
   //帰ってきた時の処理
 
@@ -1432,7 +1453,7 @@ class _RoulettePageState extends State<RoulettePage>
     }
   }
 
-  void _getMaxLength() {
+  void _getMaxLength() { //文字数制限を外したら使わない。
     //言語設定に応じてmaxLengthの値を変える処理
     if (_languageCode == 'ja') {
       titleMaxLength = 12;
@@ -1484,12 +1505,10 @@ class _RoulettePageState extends State<RoulettePage>
   }
 
   Future<void> _addItem() async {
-
-    await _addUsedColors();   //使っているカラーを調べるためのリストを作成
+    await _addUsedColors(); //使っているカラーを調べるためのリストを作成
 
     //アイテムを追加
-    await PartsViewModel.createItem(
-        _rouletteId, '', _notUsedColorsCheck(), 1);
+    await PartsViewModel.createItem(_rouletteId, '', _notUsedColorsCheck(), 1);
     await _reloadRoulette();
     await _initTextController(); //テキストコントローラーの初期化
     await _setTextController(); //テキストコントローラーに値をセット

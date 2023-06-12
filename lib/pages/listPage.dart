@@ -129,10 +129,13 @@ class _ListPageState extends State<ListPage>
                                                   Padding(
                                                     padding:
                                                         const EdgeInsets.only(
-                                                            top: 8.0),
+                                                            top: 8.0,left: 8.0,right: 8.0),
                                                     child: Text(
                                                         _roulettes[index]
-                                                            ['name']),
+                                                            ['name'],
+                                                      overflow: TextOverflow
+                                                          .ellipsis,
+                                                    ),//ルーレット名
                                                   ),
                                                   Expanded(
                                                     child: FractionallySizedBox(
