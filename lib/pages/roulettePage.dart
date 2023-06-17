@@ -59,6 +59,8 @@ class _RoulettePageState extends State<RoulettePage>
   var _rouletteShadow = 300.0; //ルーレットの影の大きさ
   var _editingSpaceHeigth = 0.0; //編集中のスペースの高さ
   var _multiple = 1; //倍率
+  var _rouletteCount = 0; //ルーレットの回転回数
+  var _isReview = false; //レビューを書いたかどうか
 
   @override
   void initState() {
@@ -244,7 +246,7 @@ class _RoulettePageState extends State<RoulettePage>
                     },
                   ),
 
-                  //レビュー機能実装途中。一旦休憩
+                  //レビュー機能実装デバッグ用。
                   //
                   // ListTile(
                   //   title: Text( 'レビューに遷移'),
@@ -263,8 +265,17 @@ class _RoulettePageState extends State<RoulettePage>
                   //     AppReview.requestReview.then(log);
                   //   },
                   // ),
+                  // ListTile(
+                  //   leading: const Icon(
+                  //     Icons.star,
+                  //   ),
+                  //   title: const Text('レビューをリセット'),
+                  //   onTap: () {
+                  //     _resetReview();
+                  //   },
+                  // ),
 
-                  //レビュー機能実装途中。一旦休憩
+                  //レビュー機能デバックよう。
                 ],
               ),
             ),
@@ -766,7 +777,7 @@ class _RoulettePageState extends State<RoulettePage>
                             children: [
                               _multipleButton(),
                               const Expanded(child: SizedBox()),
-                              FloatingActionButton(
+                              FloatingActionButton(//追加ボタン
                                 backgroundColor: Colors.white,
                                 onPressed: _isDisabled
                                     ? null
@@ -826,6 +837,28 @@ class _RoulettePageState extends State<RoulettePage>
                                   _isDisabledRolling = false; //ボタンを有効
 
                                   _resultDisplay();
+
+                                  //レビューをお願いしたかどうかを取得する。
+                                  await _getReview();
+                                  //レビューをお願いしたかどうか。レビュー依頼ずみなら
+                                  if (_isReview == false) {
+
+                                  //ルーレットを回した回数をアプリ内に保存する関数。
+                                  await _saveRouletteCount();
+                                  //ルーレットを回した回数を取得する関数。
+                                  await _getRouletteCount();
+
+                                  //ルーレットを回した回数が100回以上かどうか。
+                                  if(_rouletteCount >= 100) {
+                                    //100回以上だった場合、気に入ったかどうかのダイアログを表示。
+                                    _likeAppPopup();
+
+                                    //ルーレットを回した回数をリセットする関数。
+                                    _resetRouletteCount();
+                                  }
+
+                                    }
+
                                 },
                                 child: const Icon(Icons.refresh_rounded),
                               ),
@@ -988,28 +1021,84 @@ class _RoulettePageState extends State<RoulettePage>
     );
   }
 
+  //ルーレットを回した回数を保存する関数
+  Future<void> _saveRouletteCount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int count = prefs.getInt('rouletteCount') ?? 0;
+    count++;
+    await prefs.setInt('rouletteCount', count);
+  }
+
+  //ルーレットを回した回数を取得する関数
+  Future<void> _getRouletteCount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int count = prefs.getInt('rouletteCount') ?? 0;
+    setState(() {
+      _rouletteCount = count;
+    });
+  }
+
+  //ルーレットを回した回数をリセットする関数
+  Future<void> _resetRouletteCount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('rouletteCount', 0);
+    setState(() {
+      _rouletteCount = 0;
+    });
+  }
+
   //レビューをお願いするポップアップ
   void _reviewPopup() {
     showDialog(
       context: context,
+      barrierDismissible: false, // ダイアログ外のタップで閉じないようにする
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(appLocalizations.getTranslatedValue(
-              _languageCode, 'reviewTitle')),
-          content: Text(appLocalizations.getTranslatedValue(
-              _languageCode, 'reviewMessage')),
+              _languageCode, 'reviewTitle'),
+            style: const TextStyle(color: Colors.black),
+          ),
+          content: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.star, color: Colors.yellow),
+                    Icon(Icons.star, color: Colors.yellow),
+                    Icon(Icons.star, color: Colors.yellow),
+                    Icon(Icons.star, color: Colors.yellow),
+                    Icon(Icons.star, color: Colors.yellow),
+                  ],
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 20.0),
+                child: Icon(Icons.thumb_up, color: Colors.black, size: 100),
+              ),
+              Text(appLocalizations.getTranslatedValue(
+                  _languageCode, 'reviewMessage'),
+                  style: const TextStyle(color: Colors.black),
+        ),
+            ],
+          ),
           actions: <Widget>[
             TextButton(
               child: Text(appLocalizations.getTranslatedValue(
-                  _languageCode, 'reviewNo')),
+                  _languageCode, 'reviewNo'),
+                  style: const TextStyle(color: Colors.black)
+          ),
               onPressed: () => Navigator.pop(context),
             ),
             TextButton(
               child: Text(appLocalizations.getTranslatedValue(
-                  _languageCode, 'reviewYes')),
+                  _languageCode, 'reviewYes'),
+                  style: const TextStyle(color: Colors.black)
+          ),
               onPressed: () {
                 Navigator.pop(context);
-                _review();
+                _reviewRequest();
               },
             ),
           ],
@@ -1022,23 +1111,34 @@ class _RoulettePageState extends State<RoulettePage>
   void _likeAppPopup() {
     showDialog(
       context: context,
+      barrierDismissible: false, // ダイアログ外のタップで閉じないようにする
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(appLocalizations.getTranslatedValue(
-              _languageCode, 'likeAppTitle')),
+              _languageCode, 'likeAppTitle'),
+              style: const TextStyle(color: Colors.black)
+        ),
           content: Text(appLocalizations.getTranslatedValue(
-              _languageCode, 'likeAppMessage')),
+              _languageCode, 'likeAppMessage'),
+              style: const TextStyle(color: Colors.black)
+          ),
           actions: <Widget>[
             TextButton(
                 child: Text(appLocalizations.getTranslatedValue(
-                    _languageCode, 'likeAppNo')),
+                    _languageCode, 'likeAppNo'),
+                    style: const TextStyle(color: Colors.black)
+                ),
                 onPressed: () {
+                  //気に入ってもらえなかったら、今後ポップアップを出さない
+                  _saveReview();
                   Navigator.pop(context);
                   _requestPopup();
                 }),
             TextButton(
               child: Text(appLocalizations.getTranslatedValue(
-                  _languageCode, 'likeAppYes')),
+                  _languageCode, 'likeAppYes'),
+                  style: const TextStyle(color: Colors.black)
+              ),
               onPressed: () {
                 Navigator.pop(context);
                 _reviewPopup();
@@ -1053,22 +1153,40 @@ class _RoulettePageState extends State<RoulettePage>
   //アプリを気に入ってもらえなかったユーザーに対して、要望メールを送ってもらうポップアップを表示する。
   void _requestPopup() {
     showDialog(
+      barrierDismissible: false, // ダイアログ外のタップで閉じないようにする
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(appLocalizations.getTranslatedValue(
-              _languageCode, 'requestTitle')),
-          content: Text(appLocalizations.getTranslatedValue(
-              _languageCode, 'requestMessage')),
+              _languageCode, 'requestTitle'),
+              style: const TextStyle(color: Colors.black)
+          ),
+          content: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(bottom: 20.0),
+                child: Icon(Icons.mail, color: Colors.black, size: 100),
+              ),
+
+              Text(appLocalizations.getTranslatedValue(
+                  _languageCode, 'requestMessage'),
+                  style: const TextStyle(color: Colors.black)
+              ),
+            ],
+          ),
           actions: <Widget>[
             TextButton(
               child: Text(appLocalizations.getTranslatedValue(
-                  _languageCode, 'requestNo')),
+                  _languageCode, 'requestNo'),
+                  style: const TextStyle(color: Colors.black)
+              ),
               onPressed: () => Navigator.pop(context),
             ),
             TextButton(
               child: Text(appLocalizations.getTranslatedValue(
-                  _languageCode, 'requestYes')),
+                  _languageCode, 'requestYes'),
+                  style: const TextStyle(color: Colors.black)
+              ),
               onPressed: () {
                 //contactFormが使えないので、一旦コメントアウト 2021/08/10
                 ContactForm(languageCode: _languageCode).openMail();
@@ -1083,8 +1201,8 @@ class _RoulettePageState extends State<RoulettePage>
 
   //要望メールを送る処理
 
-  //OSに応じてレビューに遷移する処理
-  void _review() async {
+  //OSに応じてレビューリクエストに遷移する処理
+  void _reviewRequest() async {
     if (Platform.isAndroid) {
       //Androidの場合
       const url =
@@ -1099,8 +1217,32 @@ class _RoulettePageState extends State<RoulettePage>
       AppReview.requestReview.then(log);
     }
     //レビューをお願いしたら、レビューをお願いしたことを記録する
+    _saveReview();
+
+  }
+
+  //レビューをお願いしたことを記録する関数
+  Future<void> _saveReview() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('review', true);
+    await prefs.setBool('review', true);
+  }
+
+  //レビューをお願いしたかどうかを確認する関数
+  Future<void> _getReview() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool review = prefs.getBool('review') ?? false;
+    setState(() {
+      _isReview = review;
+    });
+  }
+
+  //レビューをリセットする関数
+  Future<void> _resetReview() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('review', false);
+    setState(() {
+      _isReview = false;
+    });
   }
 
   //広告用
