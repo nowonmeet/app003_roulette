@@ -3,7 +3,7 @@ class AppLocalizations {
 static final Map<String, Map<String, String>> _localizedValues = {
   'en': {
     //起動アプリ一覧で表示するタイトル
-    'title': 'Roulette',
+    'title': 'Spin The Wheel - Random Select',
 
     //初回起動時の説明
     'dice': 'Dice',
@@ -17,22 +17,22 @@ static final Map<String, Map<String, String>> _localizedValues = {
     'languageSelect': 'Language Select',
 
     //コンタクトフォーム
-    'emailSubject': 'Roulette Inquiry',
+    'emailSubject': 'Spin The Wheel - Random Select Inquiry',
     'emailBody': 'Please enter the text from here.\n\n\n\n\nInformation required for app improvement: \n(Do not delete）\n',
     'emailError&Copy':'Mail app not found. Copied email address.',
 
 
     //ルーレットリスト
-    'list': 'Roulette List',
+    'list': 'Wheel List',
     'check': 'Check',
-    'deleteConfirmationMessage':'Do you want to delete the following roulette?\n\n',
+    'deleteConfirmationMessage':'Are you sure you want to delete the following Wheel?\n\n',
     'attention':'Attention',
-    'rouletteAttention':'Roulette is required at least one.',
-    'newRoulette': 'New Roulette',
+    'rouletteAttention':'Wheel is required at least one.',
+    'newRoulette': 'New Wheel',
 
 
     //ルーレット編集
-    'titleEdit': 'Roulette Title',
+    'titleEdit': 'Wheel Title',
     'titleHintText': 'Please enter the title.',
     'partsEdit': 'Item Name',
     'partsHintText': 'Please enter the item name.',
