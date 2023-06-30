@@ -6,6 +6,7 @@ import 'package:app003_roulette/model/colorList.dart';
 import 'package:app003_roulette/pages/colorSelectPage.dart';
 import 'package:app003_roulette/pages/language_selection_page.dart';
 import 'package:app_review/app_review.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -61,6 +62,9 @@ class _RoulettePageState extends State<RoulettePage>
   var _multiple = 1; //倍率
   var _rouletteCount = 0; //ルーレットの回転回数
   var _isReview = false; //レビューを書いたかどうか
+  var _soundEffect = true; //効果音を鳴らすかどうか
+  final audioPlayer = AudioPlayer();  //ドラムロールの音
+
 
   @override
   void initState() {
@@ -76,6 +80,7 @@ class _RoulettePageState extends State<RoulettePage>
       await _addUsedColors();
       await _initTextController();
       await _setTextController();
+      await _getSoundEffect();
       //     await _getLanguage();
       _getMaxLength();
       _isLoading = false;
@@ -211,12 +216,32 @@ class _RoulettePageState extends State<RoulettePage>
                     decoration: const BoxDecoration(
                         image: DecorationImage(
                             fit: BoxFit.fitHeight,
-                            image: AssetImage('lib/assets/drawer.png'))),
+                            image: AssetImage('assets/images/drawer.png'))),
                     child: Text(
                       appLocalizations.getTranslatedValue(
                           _languageCode, 'menu'),
                     ),
                   ),
+                  ListTile(
+                    //効果音の有効無効を切り替える。
+                    title: Text(
+                      appLocalizations.getTranslatedValue(
+                          _languageCode, 'soundEffect'),
+                    ),
+                    leading: const Icon(Icons.volume_up),
+                    trailing: Switch(
+                      value: _soundEffect,
+                      onChanged: (value) {
+                        setState(() {
+                          _soundEffect = value;
+                          _saveSoundEffect();
+                        });
+                      },
+                      activeColor: Colors.blue, //onの時の色
+//                      activeTrackColor: Colors.blueAccent, //onの時の色
+                    ),
+                  ),
+
                   ListTile(
                     title: Text(
                       appLocalizations.getTranslatedValue(
@@ -812,7 +837,7 @@ class _RoulettePageState extends State<RoulettePage>
                           ),
                         ),
                       )
-                    : Container(
+                    : Container(//回転ボタン
                         margin: const EdgeInsets.only(bottom: 48.0),
                         child: Padding(
                           padding: const EdgeInsets.only(left: 36.0),
@@ -827,6 +852,10 @@ class _RoulettePageState extends State<RoulettePage>
                                       () => _isDisabledRolling = true); //ボタンを無効
                                   _displayReset(); //結果表示をリセット
                                   _resultNumber = getRandomIndex(_ratioList);
+                                  //音をならす設定かチェックする
+                                  if (_soundEffect) {
+                                     _playSound();
+                                  }
                                   await _controller.rollTo(
                                     //結果の選択（ランダムで選択）
                                     _resultNumber,
@@ -837,6 +866,12 @@ class _RoulettePageState extends State<RoulettePage>
                                   _isDisabledRolling = false; //ボタンを有効
 
                                   _resultDisplay();
+                                  //音を止める処理
+//                                  await _stopSound();
+
+                                   if (_soundEffect) {
+                                     _playClosingSound();
+                                   }
 
                                   //レビューをお願いしたかどうかを取得する。
                                   await _getReview();
@@ -848,11 +883,10 @@ class _RoulettePageState extends State<RoulettePage>
                                   //ルーレットを回した回数を取得する関数。
                                   await _getRouletteCount();
 
-                                  //ルーレットを回した回数が100回以上かどうか。
-                                  if(_rouletteCount >= 100) {
-                                    //100回以上だった場合、気に入ったかどうかのダイアログを表示。
+                                  //ルーレットを回した回数が30回以上かどうか。
+                                  if(_rouletteCount >= 30) {
+                                    //30回以上だった場合、気に入ったかどうかのダイアログを表示。
                                     _likeAppPopup();
-
                                     //ルーレットを回した回数をリセットする関数。
                                     _resetRouletteCount();
                                   }
@@ -1047,6 +1081,22 @@ class _RoulettePageState extends State<RoulettePage>
     });
   }
 
+  //音（drum_roll.mp3)をならす関数
+  Future<void> _playSound() async{
+    await audioPlayer.play(AssetSource('audio/drum_roll.mp3'));
+  }
+
+  //音（closing.mp3)をならす関数
+  void _playClosingSound() async{
+    await audioPlayer.play(AssetSource('audio/closing.mp3'));
+
+  }
+
+  //音を止める関数
+  Future<void> _stopSound() async{
+    await audioPlayer.stop();
+  }
+
   //レビューをお願いするポップアップ
   void _reviewPopup() {
     showDialog(
@@ -1201,6 +1251,8 @@ class _RoulettePageState extends State<RoulettePage>
 
   //要望メールを送る処理
 
+
+
   //OSに応じてレビューリクエストに遷移する処理
   void _reviewRequest() async {
     if (Platform.isAndroid) {
@@ -1242,6 +1294,19 @@ class _RoulettePageState extends State<RoulettePage>
     await prefs.setBool('review', false);
     setState(() {
       _isReview = false;
+    });
+  }
+
+  _saveSoundEffect() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('soundEffect', _soundEffect);
+  }
+
+  _getSoundEffect() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool soundEffect = prefs.getBool('soundEffect') ?? true;
+    setState(() {
+      _soundEffect = soundEffect;
     });
   }
 

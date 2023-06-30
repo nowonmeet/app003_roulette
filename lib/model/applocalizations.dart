@@ -15,6 +15,7 @@ static final Map<String, Map<String, String>> _localizedValues = {
     'privacy_policy': 'Privacy Policy',
     'inquiry': 'Inquiry by email',
     'languageSelect': 'Language Select',
+    'soundEffect': 'Sound Effect',
 
     //コンタクトフォーム
     'emailSubject': 'Spin The Wheel - Random Select Inquiry',
@@ -77,6 +78,7 @@ static final Map<String, Map<String, String>> _localizedValues = {
     'privacy_policy': 'プライバシーポリシー',
     'inquiry': 'メールでお問い合わせ',
     'languageSelect': '言語選択',
+    'soundEffect': '効果音',
 
     //コンタクトフォーム
     'emailSubject': 'ルーレットお問い合わせ',

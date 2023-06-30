@@ -48,6 +48,7 @@ dependencies:
   webview_flutter: ^4.0.7
   auto_size_text: ^3.0.0
   app_review: ^2.1.1+1
+  audioplayers: ^4.1.0
 
 dev_dependencies:
   flutter_test:
@@ -75,7 +76,8 @@ flutter:
 
   #　↓画像データを追加する
   assets:
-    - lib/assets/
+    - assets/images/
+    - assets/audio/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -111,16 +113,16 @@ flutter:
 flutter_icons:
   android: true
   ios: true
-  image_path: "lib/assets/icon1.png"
+  image_path: "assets/images/icon1.png"
 
 flutter_native_splash:
   color: '#ffffff'
-  image: 'lib/assets/splash.png'
+  image: 'assets/images/splash.png'
   color_dark: '#333333'
-  image_dark: 'lib/assets/splash.png'
+  image_dark: 'assets/images/splash.png'
   fullscreen: true
   android_12:
     icon_background_color: '#ffffff'
-    image: 'lib/assets/splash_android12.png'
+    image: 'assets/images/splash_android12.png'
     icon_background_color_dark: '#333333'
-    image_dark: 'lib/assets/splash_android12.png'
+    image_dark: 'assets/images/splash_android12.png'
